@@ -28,9 +28,9 @@ classifiers = [
 [project.optional-dependencies]
 pi = ["gpiozero==2.0.1"]
 vision = ["numpy==2.2.4"]
-dev = ["pytest==8.3.5", "ruff==0.11.2", "mypy==1.15.0", "build==1.2.2.post1"]
+dev = ["pytest==8.3.5", "ruff==0.16.4", "mypy==1.15.0", "build==1.2.2.post1"]
 docs = ["mkdocs==1.6.1"]
-all = ["gpiozero==2.0.1", "numpy==2.2.4", "pytest==8.3.5", "ruff==0.11.2", "mypy==1.15.0", "mkdocs==1.6.1", "build==1.2.2.post1"]
+all = ["gpiozero==2.0.1", "numpy==2.2.4", "pytest==8.3.5", "ruff==0.16.4", "mypy==1.15.0", "mkdocs==1.6.1", "build==1.2.2.post1"]
 
 [project.scripts]
 rivet = "rivet.cli:main"
