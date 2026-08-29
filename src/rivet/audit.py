@@ -242,16 +242,20 @@ class ReleaseAuditor:
         else:
             checks.append("pytest suite skipped by explicit option")
         if run_build:
-            build_commands = (
-                [sys.executable, "-m", "build", "--no-isolation", "--skip-dependency-check", "--wheel"],
-                [sys.executable, "-m", "build", "--no-isolation", "--skip-dependency-check", "--sdist"],
+            build_script = (
+                "from pathlib import Path; "
+                "from setuptools.build_meta import build_sdist, build_wheel; "
+                "out = Path('dist'); out.mkdir(exist_ok=True); "
+                "build_sdist(str(out)); build_wheel(str(out))"
             )
-            build_issues = [self._command_check("package build", command) for command in build_commands]
-            for issue in build_issues:
-                if issue:
-                    issues.append(issue)
-            if not any(build_issues):
-                checks.append("wheel and sdist build")
+            issue = self._command_check("package build", [sys.executable, "-c", build_script])
+            if issue:
+                issues.append(issue)
+            else:
+                artifact_issues = self._artifact_checks()
+                issues.extend(artifact_issues)
+                if not artifact_issues:
+                    checks.append("wheel and sdist build")
         else:
             checks.append("package build skipped by explicit option")
         return AuditReport(tuple(issues), tuple(checks))
@@ -358,6 +362,22 @@ class ReleaseAuditor:
                     issues.append(AuditIssue("examples", self._relative(path), f"invalid JSON example: {exc}"))
             elif path.is_file() and path.suffix.lower() in {".yaml", ".yml"} and not path.read_text(encoding="utf-8").strip():
                 issues.append(AuditIssue("examples", self._relative(path), "example is empty"))
+        return issues
+
+    def _artifact_checks(self) -> list[AuditIssue]:
+        version = self._version()
+        normalized_name = "rivet_robot_runtime"
+        dist = self.root / "dist"
+        issues: list[AuditIssue] = []
+        wheel = tuple(dist.glob(f"{normalized_name}-{version}-*.whl"))
+        sdist = dist / f"{normalized_name}-{version}.tar.gz"
+        if not wheel:
+            issues.append(AuditIssue("artifact", self._relative(dist), f"wheel for version {version} was not created"))
+        if not sdist.exists():
+            issues.append(AuditIssue("artifact", self._relative(dist), f"sdist for version {version} was not created"))
+        for artifact in dist.glob(f"{normalized_name}-*"):
+            if version not in artifact.name:
+                issues.append(AuditIssue("artifact", self._relative(artifact), "stale package artifact remains in dist"))
         return issues
 
     def _command_check(self, label: str, command: list[str]) -> AuditIssue | None:
