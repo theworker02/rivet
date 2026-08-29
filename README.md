@@ -16,7 +16,91 @@
 
 Rivet is an installable Python runtime and capability platform for robots that need a clear boundary between **what hardware exists**, **what the robot is qualified to do**, and **what it is currently allowed to command**. The core runs without Pi hardware through a deterministic simulator, while physical adapters remain explicit integrations rather than hidden claims.
 
-> **Current status:** Rivet `1.2.0` is a verification-gated beta release. Its dependency-free simulator, capability contracts, safety boundary, fault scenarios, role/skill model, recorder, release audit, and package checks run locally and in CI. Physical adapters remain explicit integrations, and Rivet is not a certified safety controller or autonomous authorization system.
+> **Current status:** Rivet `1.2.0` is a verification-gated beta release. Its dependency-free simulator, capability contracts, safety boundary, fault scenarios, role/skill model, recorder, release audit, and package checks run locally and in CI. Physical adapters remain explicit integrations rather than certification claims, and Rivet is not a certified safety controller or autonomous authorization system.
+
+## Rivet 1.2.0 is released
+
+The current release is available from [PyPI](https://pypi.org/project/rivet-robot-runtime/1.2.0/) and the [GitHub release page](https://github.com/theworker02/rivet/releases/tag/v1.2.0).
+
+### Install from PyPI
+
+The normal installation installs the runtime and both public CLI entry points:
+
+```bat
+python -m pip install --upgrade rivet-robot-runtime==1.2.0
+rivet version --verbose
+rivet verify
+```
+
+`python -m rivet` is equivalent to the installed `rivet` command. The developer companion command is `rivet-dev`:
+
+```bat
+rivet --help
+rivet-dev --help
+rivet-dev audit-content
+```
+
+For an upgrade from an earlier release:
+
+```bat
+python -m pip install --upgrade rivet-robot-runtime
+python -m rivet version
+```
+
+Optional extras are intentionally separate from the dependency-free runtime:
+
+| Extra | Installs | Use |
+| --- | --- | --- |
+| `pi` | `gpiozero` | Pi-oriented adapter integration |
+| `vision` | `numpy` | Optional numerical vision integration |
+| `dev` | pytest, Ruff, mypy, build, pinned setuptools | Tests, static checks, and local release builds |
+| `docs` | MkDocs | Documentation tooling |
+| `all` | All optional dependencies | Full development environment |
+
+Install an extra with `python -m pip install "rivet-robot-runtime[dev]==1.2.0"`. The base package does not import Pi-only libraries or require physical hardware.
+
+### Release artifacts
+
+The CLI is shipped inside the standard Python package; there is no separate CLI download. The 1.2.0 release contains these actual artifacts:
+
+| Artifact | Format | Purpose | Verified source |
+| --- | --- | --- | --- |
+| `rivet_robot_runtime-1.2.0-py3-none-any.whl` | Universal wheel | Fast installation on supported Python 3.10–3.13 environments | [GitHub release asset](https://github.com/theworker02/rivet/releases/download/v1.2.0/rivet_robot_runtime-1.2.0-py3-none-any.whl) |
+| `rivet_robot_runtime-1.2.0.tar.gz` | Source distribution | Rebuild or audit the source package locally | [GitHub release asset](https://github.com/theworker02/rivet/releases/download/v1.2.0/rivet_robot_runtime-1.2.0.tar.gz) |
+
+Both artifacts are also published through [PyPI](https://pypi.org/project/rivet-robot-runtime/1.2.0/). The published SHA-256 digests are:
+
+```text
+rivet_robot_runtime-1.2.0-py3-none-any.whl
+5ee535e3d61e802f71a37defdacf6e3dcb2a50ed8a846e2eab84ef5103e30040
+
+rivet_robot_runtime-1.2.0.tar.gz
+4845c873f25eeefde0f4d27663a165f5c3f731231c1f5309dadb829902a4b3e3
+```
+
+Verify a downloaded artifact on Windows:
+
+```bat
+certutil -hashfile rivet_robot_runtime-1.2.0-py3-none-any.whl SHA256
+certutil -hashfile rivet_robot_runtime-1.2.0.tar.gz SHA256
+```
+
+On Linux or macOS:
+
+```bash
+sha256sum rivet_robot_runtime-1.2.0-py3-none-any.whl
+sha256sum rivet_robot_runtime-1.2.0.tar.gz
+```
+
+### What changed in 1.2.0
+
+- **Verification pipeline:** `rivet verify` checks configuration, startup, driver discovery, capability registration and health, safety, roles, skills, missions, simulation, command/telemetry, recorder/replay, and graceful shutdown.
+- **Executable reliability scenarios:** 18 simulator scenarios cover boot, discovery, role assignment, mission admission, sensor recovery, watchdogs, resource pressure, recording/replay, multi-robot coordination, dry runs, Reflex, Pulse, Capsules, and fault-domain isolation.
+- **Operational signals:** capability health, Pulse heartbeats, bounded recovery, fault domains, typed units, configuration migration, mission checkpoints, compensation, sanitized support bundles, and compatibility/resource checks.
+- **Release quality gates:** `rivet check-release` and `rivet-dev audit-content` validate tests, documentation links/assets, examples, schemas, metadata, package artifacts, and unfinished release content.
+- **Documentation and packaging:** the README, static site, architecture material, driver evidence, simulator workflows, safety boundaries, and installable wheel/sdist were updated for the Beta release.
+
+For the complete chronological history, see [`CHANGELOG.md`](CHANGELOG.md). Release claims remain bounded: simulator PASS results do not certify physical hardware, and physical drivers must provide their own evidence and deployment review.
 
 ## See it run
 
