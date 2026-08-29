@@ -1,9 +1,29 @@
-# Configuration
+# Versioned configuration
 
-`rivet init` creates a dependency-free JSON configuration:
+Rivet 1.2 uses schema version 2. `rivet init` writes canonical JSON:
 
 ```bat
 python -m rivet init rover.json --robot-id rover-01
+python -m rivet config validate rover.json
 ```
 
-The richer `examples/rover.yaml` remains a documented target manifest. A versioned YAML adapter will be added only when its optional dependency, schema validation, and tests are maintained together.
+The root marker is `"rivet": 2`:
+
+```json
+{
+  "rivet": 2,
+  "robot": {"id": "rover-01", "platform": "simulator"},
+  "simulate": true,
+  "devices": {},
+  "safety": {},
+  "role": {}
+}
+```
+
+Legacy v1 documents with a string `robot` or `capabilities` are migrated explicitly:
+
+```bat
+python -m rivet config migrate legacy.json --output robot-v2.json
+```
+
+Core startup accepts JSON and `.rivet` files. YAML manifests require a maintained adapter with schema tests; the repository example is documentation input, not silently parsed by the core.

@@ -30,6 +30,56 @@ _REQUIREMENT_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+(?:\[[^\]]+\])?(?:[<>=!~]=?.
 _LINK_PATTERN = re.compile(r"!?(?:\[[^\]]*\])\(([^)]+)\)")
 
 
+def _fallback_toml(path: Path) -> dict[str, Any]:
+    """Parse the small TOML subset needed by the release audit on Python 3.10."""
+    document: dict[str, Any] = {}
+    section: tuple[str, ...] = ()
+    pending: list[str] | None = None
+    pending_key = ""
+    pending_section: tuple[str, ...] = ()
+
+    def assign(key: str, raw_value: str, target_section: tuple[str, ...]) -> None:
+        try:
+            value = ast.literal_eval(raw_value)
+        except (SyntaxError, ValueError):
+            return
+        target: dict[str, Any] = document
+        for part in target_section:
+            target = target.setdefault(part, {})
+        target[key] = value
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if pending is not None:
+            pending.append(line)
+            if "]" in line and line.count("]") >= line.count("["):
+                assign(pending_key, " ".join(pending), pending_section)
+                pending = None
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            section = tuple(part.strip() for part in line[1:-1].split("."))
+            continue
+        if "=" not in line:
+            continue
+        key, raw_value = (part.strip() for part in line.split("=", 1))
+        if raw_value.startswith("[") and raw_value.count("]") < raw_value.count("["):
+            pending = [raw_value]
+            pending_key = key
+            pending_section = section
+        else:
+            assign(key, raw_value, section)
+    return document
+
+
+def _load_toml(path: Path) -> dict[str, Any]:
+    if tomllib is not None:
+        with path.open("rb") as handle:
+            return tomllib.load(handle)
+    return _fallback_toml(path)
+
+
 @dataclass(frozen=True)
 class AuditIssue:
     category: str
@@ -154,32 +204,15 @@ class ContentAuditor:
         path = self.root / "pyproject.toml"
         if not path.exists():
             return {}
-        if tomllib is not None:
-            with path.open("rb") as handle:
-                data = tomllib.load(handle)
-            section = data.get("tool", {}).get("rivet", {}).get("audit", {})
-            return {key: list(value) for key, value in section.items() if isinstance(value, list)}
-        return self._fallback_config(path)
+        data = _load_toml(path)
+        section = data.get("tool", {}).get("rivet", {}).get("audit", {})
+        return {key: list(value) for key, value in section.items() if isinstance(value, list)}
 
     @staticmethod
     def _fallback_config(path: Path) -> dict[str, list[str]]:
-        result: dict[str, list[str]] = {}
-        active = False
-        for raw_line in path.read_text(encoding="utf-8").splitlines():
-            line = raw_line.strip()
-            if line.startswith("["):
-                active = line == "[tool.rivet.audit]"
-                continue
-            if active and "=" in line:
-                key, raw_value = (part.strip() for part in line.split("=", 1))
-                if raw_value.startswith("[") and raw_value.endswith("]"):
-                    try:
-                        value = json.loads(raw_value)
-                    except json.JSONDecodeError:
-                        value = []
-                    if isinstance(value, list):
-                        result[key] = [str(item) for item in value]
-        return result
+        data = _fallback_toml(path)
+        section = data.get("tool", {}).get("rivet", {}).get("audit", {})
+        return {key: list(value) for key, value in section.items() if isinstance(value, list)}
 
     def _relative(self, path: Path) -> str:
         return path.resolve().relative_to(self.root).as_posix()
@@ -234,6 +267,13 @@ class ReleaseAuditor:
         license_path = self.root / "LICENSE"
         if not license_path.exists() or not license_path.read_text(encoding="utf-8").strip():
             issues.append(AuditIssue("metadata", "LICENSE", "license metadata file is missing or empty"))
+        generated = self.root / "src" / "rivet_robot_runtime.egg-info" / "PKG-INFO"
+        if generated.exists():
+            generated_text = generated.read_text(encoding="utf-8")
+            if f"Version: {version}" not in generated_text:
+                issues.append(AuditIssue("metadata", self._relative(generated), "generated package version is stale"))
+            if "Development Status :: 3 - Alpha" in generated_text:
+                issues.append(AuditIssue("metadata", self._relative(generated), "generated package still declares Alpha status"))
         for group, requirements in project.get("optional-dependencies", {}).items():
             for requirement in requirements:
                 if not isinstance(requirement, str) or not _REQUIREMENT_PATTERN.fullmatch(requirement):
@@ -293,10 +333,7 @@ class ReleaseAuditor:
         return None
 
     def _toml(self, path: Path) -> dict[str, Any]:
-        if tomllib is None:
-            return {}
-        with path.open("rb") as handle:
-            return tomllib.load(handle)
+        return _load_toml(path)
 
     def _version(self) -> str:
         source = self.root / "src" / "rivet" / "version.py"

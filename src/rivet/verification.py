@@ -110,6 +110,14 @@ class VerificationRunner:
             return f"robot={config.robot_id}, platform={config.platform}"
 
         stage("Core Runtime", lambda: "verification pipeline ready")
+        def check_cli() -> str:
+            from .cli import parser
+
+            if parser().prog != "rivet":
+                raise RuntimeError("CLI parser has an unexpected program name")
+            return "rivet parser and entrypoint loaded"
+
+        stage("CLI", check_cli)
         stage("Configuration", validate_configuration)
 
         def start_runtime() -> str:
@@ -132,7 +140,7 @@ class VerificationRunner:
                 raise RuntimeError(f"simulator driver discovered {len(discovered)} commandable devices; expected 3")
             return f"simulator driver discovered {len(discovered)} commandable devices"
 
-        stage("Driver Discovery", discover_drivers)
+        stage("Driver System", discover_drivers)
 
         def register_capabilities() -> str:
             if runtime is None or robot is None:
@@ -147,6 +155,16 @@ class VerificationRunner:
             return f"{count} capabilities registered"
 
         stage("Capability Registry", register_capabilities)
+
+        def validate_health() -> str:
+            if runtime is None:
+                raise RuntimeError("runtime did not start")
+            statuses = runtime.health.status()
+            if len(statuses) < 5 or any(item["state"] != "HEALTHY" for item in statuses.values()):
+                raise RuntimeError("capability health is not healthy at startup")
+            return f"{len(statuses)} capability health records initialized"
+
+        stage("Capability Health", validate_health)
 
         def initialize_safety() -> str:
             nonlocal guard

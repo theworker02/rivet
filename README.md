@@ -37,7 +37,7 @@ These visuals are generated from real local Rivet commands and simulator APIs. T
   <img src="site/assets/rivet-fault-injection.gif" alt="Animated Rivet simulator fault injection sequence showing nominal, disconnect, and restored states" width="760">
 </p>
 
-<p align="center"><sub>Fault injection is exercised through the same safe-state seams used by the simulator. No physical robot is implied.</sub></p>
+<p align="center"><sub>Rivet 1.2.0 verification is generated from real local commands. Physical adapters remain explicit evidence-bearing integrations.</sub></p>
 
 ## Why Rivet exists
 
@@ -106,7 +106,9 @@ python -m rivet run --simulate
 ### First commands
 
 ```text
-rivet version                       # print the installed version
+rivet verify                       # run the end-to-end installation health gate
+rivet check-release                # block releases on known quality failures
+rivet version --verbose            # show version and diagnostic identifiers
 rivet devices                       # list simulated capabilities
 rivet discover                      # inspect capability contracts
 rivet tree                          # render the device tree
@@ -191,7 +193,15 @@ runtime.command(
 - Mission decomposition, admission checks, explanations, and competence-based team assignment.
 - EchoMap experience marks with evidence and sensor provenance.
 
-## Qualification is not authority
+### Verification and operations
+
+- `rivet verify` validates configuration, runtime startup, driver discovery, capability registration/health, safety, roles, skills, mission parsing, simulation, command/telemetry, recorder, replay, and graceful shutdown.
+- Eighteen executable end-to-end scenarios cover boot, role and mission flow, sensor recovery, watchdogs, resource pressure, recording/replay, dry runs, multi-robot registration, Reflex, Pulse, Capsules, and fault-domain isolation.
+- Typed units and capability contracts distinguish distance, velocity, angle, force, voltage, current, temperature, duration, and frequency and enforce command ranges before dispatch.
+- Health states, Pulse signals, bounded recovery, and fault domains expose degraded capabilities without turning them into authority.
+- Versioned configuration migration, mission checkpoints/compensation, deterministic timelines, sanitized crash reports, support bundles, compatibility matrices, resource tiers, and performance budgets are available through the CLI.
+- `rivet check-release` and `rivet-dev audit-content` are strict quality gates for tests, docs, examples, metadata, package artifacts, and unfinished release content.
+
 
 A role evaluation reports compatibility. It does not authorize motion.
 
@@ -209,7 +219,7 @@ A passport qualification is evidence. It is not an actuator token, lease, emerge
 | Example | Demonstrates |
 | --- | --- |
 | [`examples/differential-drive`](examples/differential-drive) | Discovery, authority, actuator lease, command, and safe expiry |
-| [`examples/robot-arm`](examples/robot-arm) | Motion IR and a future manipulation-driver boundary without hardware claims |
+| [`examples/robot-arm`](examples/robot-arm) | Motion IR and a validated intent boundary without hardware claims |
 | [`examples/camera-rover`](examples/camera-rover) | Camera capability metadata and perception provenance |
 | [`examples/pico-bridge`](examples/pico-bridge) | Rivet Link framing and a deterministic UART boundary |
 | [`examples/role-assignment`](examples/role-assignment) | Role evaluation and prerequisite-aware skills |
@@ -248,7 +258,7 @@ src/rivet/
 ├── mission.py             decomposition, admission, and explanation
 ├── team.py                competence-based team assignment
 ├── vocation_runtime.py    Phase III composition layer
-└── cli.py                 public `rivet` command surface
+├── cli.py                  public `rivet` command surface
 
 drivers/                   reference and mock hardware adapters
 sdk/                       schemas and thin SDK examples
@@ -270,8 +280,9 @@ python -m pytest
 python -m ruff check src tests drivers sdk
 python -m mypy src
 python -m compileall -q src drivers sdk tests
-python tools\dev.py check
-python tools\site\build.py
+python -m rivet verify
+rivet-dev audit-content
+python -m rivet check-release
 ```
 
 Regenerate the visual evidence after changing simulator or diagnostic output:
@@ -283,6 +294,7 @@ python tools\media\generate.py
 The release artifacts are built with:
 
 ```bat
+python -m pip install "setuptools==81.0.0"
 python -m build --no-isolation --wheel
 python -m build --no-isolation --sdist
 ```
@@ -291,7 +303,7 @@ The static site source is copied to `site-build/` for Pages deployment. Generate
 
 ## Safety, scope, and honesty
 
-Rivet is intentionally explicit about what it does not provide yet:
+Rivet 1.2.0 is a verification-gated Beta release, not a claim of universal physical readiness. The following remain explicit deployment boundaries:
 
 - No claim of production Raspberry Pi hardware support for every adapter listed here.
 - No unconditional import of `RPi.GPIO`, libcamera, serial, or vision libraries.

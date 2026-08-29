@@ -1,32 +1,33 @@
 # Roadmap
 
-## 0.4 — Repository foundation
+Rivet 1.2.0 is the current verification-gated Beta release. The shipped surface is intentionally broader than the original repository foundation, but physical hardware support remains evidence-specific.
 
-- [x] Installable package metadata and optional extras
-- [x] Simulator and fault injection
-- [x] Mock driver matrix
-- [x] Protocol codec and tests
-- [x] CLI, docs, workflows, and community files
+## 1.2.0 — Verification-gated Beta (current)
 
-## 0.5 — Hardware integration
+- [x] Versioned schema-v2 configuration and migration
+- [x] `rivet verify` and 18 executable end-to-end simulator scenarios
+- [x] Strict release/content/documentation/package gates
+- [x] Typed units and capability contracts
+- [x] Driver qualification metadata and hardware certification reports
+- [x] Capability health, Pulse, bounded recovery, and fault domains
+- [x] Versioned recorder, deterministic replay, and timeline inspection
+- [x] Dry runs, checkpoints, compensation transactions, Reflex, and Capsules
+- [x] Compatibility matrix, resource tiers, performance budgets, support bundles, and crash inspection
+- [x] CI separation for tests, end-to-end, documentation, package, security, Pi compatibility, benchmarks, and release
 
-- [ ] Versioned manifest parser with optional YAML adapter
-- [ ] Raspberry Pi GPIO/I²C/SPI/UART adapters
-- [ ] Rivet Link transport endpoint
-- [ ] Hardware-in-the-loop fixtures
-- [ ] Persistent runtime and qualification state
+## 1.3 — Deployment hardening
 
-## 0.6 — Operations
+- [ ] Maintained Raspberry Pi GPIO/I²C/SPI/UART production adapters with board-specific conformance evidence
+- [ ] Hardware-in-the-loop fixtures and reviewed emergency-stop/watchdog integration
+- [ ] Process-isolated Guard and supervisor service with restart/rollback validation
+- [ ] Authenticated transport endpoint and fleet identity/key rotation
+- [ ] Persistent signed role/skill/passport registry with revocation and audit retention
 
-- [ ] Process-isolated guard and supervisor
-- [ ] Local dashboard
-- [ ] Authenticated multi-node discovery
-- [ ] Signed package registry and key rotation
-- [ ] A/B updates and rollback validation
+## Later integrations
 
-## Later
+- [ ] ROS adapter and additional SDKs
+- [ ] Dashboard/UI backed by the same Pulse and recorder APIs
+- [ ] A/B updates and signed package registry
+- [ ] Independent safety certification where a deployment requires it
 
-- [ ] Rust/C++/TypeScript SDKs
-- [ ] ROS integration adapter
-- [ ] Certified hardware validation suites
-- [ ] Stable API policy and 1.0 release criteria
+A roadmap item is not a release claim until it has an implementation, tests, documentation, and a passing release gate.

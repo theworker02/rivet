@@ -17,3 +17,16 @@ def test_init_writes_json_config(tmp_path: Path):
 def test_simulation_command_reports_fault(capsys):
     assert main(["run", "--simulate", "--fault", "motion.left-wheel"]) == 0
     assert "SIMULATED" not in capsys.readouterr().out
+
+
+def test_version_verbose_and_driver_commands(capsys):
+    assert main(["version", "--verbose"]) == 0
+    assert "Rivet 1.2.0" in capsys.readouterr().out
+    assert main(["drivers"]) == 0
+    assert "SIMULATED" in capsys.readouterr().out
+
+
+def test_dry_run_command_does_not_emit_hardware_commands(capsys):
+    assert main(["mission", "run", "inspect zone A", "--role", "inspection", "--dry-run"]) == 0
+    output = capsys.readouterr().out
+    assert "No hardware commands were executed." in output

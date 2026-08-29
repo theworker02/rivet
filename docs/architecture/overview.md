@@ -1,18 +1,26 @@
 # Repository architecture
 
-The `src/rivet` package remains the installable core. Top-level `drivers/` contains reference/mock adapters, `sdk/` contains application-facing examples and schemas, `tests/` verifies behavior, and `tools/` contains developer/release scripts.
+Rivet 1.2.0 is organized around executable boundaries rather than empty architectural names:
 
 ```text
-application
-   │
-   ▼
-VocationRuntime → ContinuumRuntime → RobotRuntime
-                                      │
-                         Guard / authority / leases
-                                      │
-                         Device + Driver contracts
-                                      │
-                         mock or physical adapters
+application / SDK / mission authoring
+              │
+              ▼
+Vocation + Mission operations + Capsules
+              │
+              ▼
+Continuum + resources + perception + topology
+              │
+              ▼
+RobotRuntime + EventBus + typed contracts
+       │              │                │
+  Guard / Reflex   Health / Pulse   Recorder / Replay
+              │
+              ▼
+DriverRegistry → simulator, mocks, or qualified hardware adapters
+              │
+              ▼
+Verification and release gates
 ```
 
-The simulator is a real backend used by CLI and tests; no Pi import is required for core startup.
+`src/rivet` is the installable core. Top-level `drivers/` contains reference adapters and qualification metadata, `sdk/` contains schemas/examples, `tests/` contains unit/integration/e2e coverage, `site/` contains the generated evidence site, and `tools/` contains executable developer/release utilities. Core startup imports without Raspberry Pi hardware libraries.
