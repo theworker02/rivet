@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible Rivet problem
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the smallest command or code sample.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Rivet and Python version
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output and environment
+      description: Include OS, architecture, and full error output; remove secrets.
+    validations:
+      required: true

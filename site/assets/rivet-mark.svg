@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" role="img" aria-labelledby="title desc">
+  <title id="title">Rivet mark</title>
+  <desc id="desc">A teal, cyan, and amber hexagonal rivet with a central bolt and hole.</desc>
+  <defs>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8be9fd"/>
+      <stop offset="0.52" stop-color="#63d6ba"/>
+      <stop offset="1" stop-color="#f2b866"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="1" stop-color="#8be9fd"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="244" height="244" rx="62" fill="#101b29" stroke="#314a64" stroke-width="8"/>
+  <path d="M130 34 211 81v78l-81 47-81-47V81Z" fill="url(#mark)"/>
+  <path d="m141 54-54 86h40l-13 57 56-88h-41Z" fill="url(#bolt)"/>
+  <circle cx="130" cy="130" r="22" fill="#101b29" stroke="#f2b866" stroke-width="8"/>
+  <circle cx="130" cy="130" r="6" fill="#f2b866"/>
+</svg>

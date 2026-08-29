@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 260" role="img" aria-labelledby="title desc">
+  <title id="title">Rivet robotics infrastructure</title>
+  <desc id="desc">A teal and amber rivet mark beside the word Rivet.</desc>
+  <defs>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8be9fd"/>
+      <stop offset="0.52" stop-color="#63d6ba"/>
+      <stop offset="1" stop-color="#f2b866"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="1" stop-color="#8be9fd"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(28 28)">
+    <rect width="204" height="204" rx="52" fill="#101b29" stroke="#314a64" stroke-width="6"/>
+    <path d="M102 27 174 68v68l-72 41-72-41V68Z" fill="url(#mark)" opacity=".98"/>
+    <path d="m112 45-48 75h35l-11 43 48-76h-35Z" fill="url(#bolt)"/>
+    <circle cx="102" cy="102" r="18" fill="#101b29" stroke="#f2b866" stroke-width="7"/>
+    <circle cx="102" cy="102" r="5" fill="#f2b866"/>
+  </g>
+  <g fill="#eef4ff" font-family="Inter,Segoe UI,Arial,sans-serif">
+    <text x="286" y="145" font-size="112" font-weight="800" letter-spacing="18">RIVET</text>
+    <text x="294" y="197" fill="#8be9fd" font-size="22" font-weight="700" letter-spacing="7">ROBOTICS INFRASTRUCTURE</text>
+  </g>
+</svg>

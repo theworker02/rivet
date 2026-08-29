@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Rivet is safety-first robotics infrastructure for adaptive Raspberry Pi robots.">
+  <title>Rivet — Robotics infrastructure</title>
+  <link rel="icon" type="image/svg+xml" href="assets/rivet-mark.svg">
+  <link rel="stylesheet" href="styles/site.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="site-nav">
+      <a class="brand" href="index.html"><img src="assets/rivet-logo.svg" alt="Rivet robotics infrastructure"></a>
+      <div class="nav-links"><a href="pages/getting-started.html">Get started</a><a href="pages/architecture.html">Architecture</a></div>
+    </nav>
+    <div class="hero-copy">
+      <p class="eyebrow">Raspberry Pi robotics infrastructure</p>
+      <h1>Discover hardware.<br>Build capability.<br><span>Stay safe.</span></h1>
+      <p class="lede">An installable runtime for robot hardware, perception, roles, skills, missions, and auditable operation.</p>
+      <div class="actions"><a class="button" href="pages/getting-started.html">Get started</a><a class="text-link" href="pages/architecture.html">See the architecture →</a></div>
+    </div>
+  </header>
+  <main>
+    <section class="feature-grid" aria-label="Rivet layers">
+      <article><p class="card-kicker">01 / Hardware</p><h2>One command boundary</h2><p>Device contracts, capability discovery, authority grants, leases, and simulator-backed drivers keep applications independent from wiring details.</p></article>
+      <article><p class="card-kicker">02 / Continuum</p><h2>Adapt to the host</h2><p>Profiles, governors, perception provenance, topology, lifecycle, and offline cluster primitives make resource changes visible.</p></article>
+      <article><p class="card-kicker">03 / Vocation</p><h2>Make competence explicit</h2><p>Roles, SkillGraph, Synapse, Motion IR, passports, missions, and teams describe what a robot is qualified to do.</p></article>
+    </section>
+    <section class="evidence">
+      <div><p class="eyebrow">Generated from real local runs</p><h2>Evidence before promises.</h2><p>Rivet ships a dependency-free simulator so the command boundary, diagnostics, and fault response can be exercised before physical adapters are connected.</p></div>
+      <img src="assets/rivet-doctor.png" alt="Rivet doctor diagnostic output showing a healthy simulated system">
+      <img src="assets/rivet-simulator.png" alt="Rivet simulator capability map showing five simulated capabilities">
+    </section>
+    <section class="terminal"><div><p class="eyebrow">Try it locally</p><h2>One install. One safe boundary.</h2></div><pre>$ python -m pip install -e ".[dev]"
+$ python -m rivet doctor --verbose
+✓ capability registry
+✓ command boundary
+✓ simulator backend
+✓ preflight ready</pre></section>
+  </main>
+  <footer><img src="assets/rivet-mark.svg" alt="Rivet mark"><span>Rivet 1.2.0 is a verification-gated beta release. Physical adapters and production identity remain explicit integrations.</span></footer>
+</body>
+</html>

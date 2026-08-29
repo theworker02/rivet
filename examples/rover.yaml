@@ -1,0 +1,173 @@
+# Continuum manifest shape for a future `rivet apply` command.
+# The current prototype registers the equivalent simulated devices in Python.
+robot: rover-continuum
+
+compute:
+  nodes:
+    - id: pi-main
+      role: coordinator
+      model: pi-5
+    - id: pi-vision
+      role: perception
+      model: pi-4
+    - id: pi-io
+      role: hardware
+      model: zero-2-w
+
+runtime_profiles:
+  nano:
+    target_ram_mb: 64
+    dashboard: false
+    recorder: ring-buffer
+    vision: disabled
+    telemetry: minimal
+  core:
+    target_ram_mb: 256
+    dashboard: optional
+    recorder: enabled
+    vision: lightweight
+    telemetry: standard
+  full:
+    target_ram_mb: 1024
+    dashboard: true
+    recorder: full
+    vision: enabled
+    telemetry: full
+    perception_fusion: true
+
+governor:
+  memory_warning_percent: 75
+  memory_critical_percent: 90
+  temperature_warning_c: 75
+  temperature_critical_c: 85
+
+capabilities:
+  left_motor:
+    path: motion.left-wheel
+    type: motion.dc-motor
+    driver: tb6612
+    bus: pi-io
+    pwm: 12
+    direction: 16
+    max_rpm: 180
+    lifecycle: resident
+  right_motor:
+    path: motion.right-wheel
+    type: motion.dc-motor
+    driver: tb6612
+    bus: pi-io
+    pwm: 13
+    direction: 20
+    max_rpm: 180
+    lifecycle: resident
+  front_camera:
+    path: vision.front-camera
+    type: camera.rgb
+    driver: libcamera
+    bus: pi-vision
+    lifecycle:
+      optional: true
+      idle_unload_s: 300
+  imu_primary:
+    path: perception.orientation
+    type: imu.orientation
+    driver: bno085
+    bus: i2c
+    address: 0x4A
+    priority: 100
+  imu_fallback:
+    path: perception.orientation
+    type: imu.orientation
+    driver: mpu6050
+    bus: i2c
+    address: 0x68
+    priority: 50
+
+failover:
+  perception.orientation:
+    failover_ms: 25
+
+safety:
+  guard: rivet-guard
+  motion_watchdog_ms: 250
+  failure:
+    motion.left-wheel: brake
+    motion.right-wheel: brake
+  radiography:
+    hardware_interlock_required: true
+    operator_authorization_required: true
+
+cluster:
+  offline_first: true
+  heartbeat_timeout_s: 3
+  workloads:
+    object_detection:
+      preferred_node: pi-vision
+      fallback_node: pi-main
+
+# Phase III Vocation configuration shape.
+vocation:
+  robot:
+    id: atlas-07
+    platform: raspberry-pi-5
+  roles:
+    primary: search-rescue
+    secondary:
+      - inspection
+      - mapping
+  qualification_states:
+    candidate: role adopted, not authorized
+    trained: curriculum completed
+    validated: benchmark and physical validation passed
+    authorized: operator approval recorded
+  restrictions:
+    - medical-procedures
+    - hazardous-materials
+  skills:
+    navigation.indoor:
+      level: 0.94
+      dependencies: []
+    search.thermal:
+      level: 0.86
+      dependencies:
+        - thermal-calibration
+    inspection.structural:
+      level: 0.76
+      dependencies:
+        - perception.provenance
+  role_specs:
+    search-rescue:
+      required_skills:
+        navigation.indoor: 0.70
+        search.thermal: 0.75
+        inspection.structural: 0.65
+      required_hardware:
+        - vision.front-camera
+        - perception.imu
+      prohibited_actions:
+        - medical-procedure
+  synapses:
+    - id: grasp-cylinder.syn
+      skill: manipulation.general
+      stages:
+        - imported
+        - adapted
+        - simulated
+        - physically-validated
+        - certified
+  missions:
+    rescue-042:
+      goal: search building sector B
+      required_role: search-rescue
+      constraints:
+        avoid:
+          - restricted_zones
+      success:
+        coverage: 0.95
+  echomap:
+    sharing: offline-first
+    fields:
+      - wheel-slip
+      - lighting
+      - radio-quality
+      - sensor-reliability

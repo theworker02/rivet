@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rivet-robot-runtime"
+dynamic = ["version"]
+description = "An adaptive, safety-first runtime and capability platform for Raspberry Pi robotics"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Rivet contributors"}]
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["robotics", "raspberry-pi", "robot-runtime", "hardware-abstraction", "robot-safety"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: System :: Hardware",
+]
+
+[project.optional-dependencies]
+pi = ["gpiozero==2.0.1"]
+vision = ["numpy==2.2.4"]
+dev = ["pytest==8.3.5", "ruff==0.11.2", "mypy==1.15.0", "build==1.2.2.post1"]
+docs = ["mkdocs==1.6.1"]
+all = ["gpiozero==2.0.1", "numpy==2.2.4", "pytest==8.3.5", "ruff==0.11.2", "mypy==1.15.0", "mkdocs==1.6.1", "build==1.2.2.post1"]
+
+[project.scripts]
+rivet = "rivet.cli:main"
+rivet-dev = "rivet.dev_cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "rivet.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.rivet.audit]
+# Marker classes and type-only buffer labels are intentional; every other release-code marker blocks the gate.
+ignore = [
+  "src/rivet/errors.py:pass",
+  "src/rivet/perception.py:pass",
+]

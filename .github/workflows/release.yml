@@ -1,0 +1,32 @@
+name: Release validation
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip build twine
+      - run: python -m pip install --no-deps -e .
+      - run: python -m pytest
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Create checksums
+        shell: bash
+        run: sha256sum dist/* > dist/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rivet-${{ github.ref_name }}
+          path: dist/
+
+# Publishing is intentionally not enabled until a real package index owner,
+# trusted publisher, and release policy are configured.

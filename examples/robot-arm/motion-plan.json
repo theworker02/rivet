@@ -1,0 +1,5 @@
+{
+  "plan_id": "arm-grasp-demo",
+  "embodiment": "simulated-arm",
+  "operations": [{"action": "grasp", "object_id": "obj-1", "constraints": {"max_force_n": 8}, "verification": {"require_contact": true}}]
+}

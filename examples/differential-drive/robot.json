@@ -1,0 +1,10 @@
+{
+  "robot": {"id": "rover-demo", "platform": "simulator"},
+  "simulate": true,
+  "devices": {
+    "left_motor": {"path": "motion.left-wheel", "driver": "generic-pwm"},
+    "right_motor": {"path": "motion.right-wheel", "driver": "generic-pwm"}
+  },
+  "safety": {"motion_timeout_ms": 250},
+  "role": {"primary": "inspection"}
+}

@@ -1,0 +1,307 @@
+from __future__ import annotations
+
+import ast
+import fnmatch
+import json
+import re
+import subprocess
+import sys
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Iterable
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 support; the fallback handles this file's small audit section.
+    tomllib = None  # type: ignore[assignment]
+
+
+_MARKERS = (
+    "TODO: implement",
+    "FIXME",
+    "NotImplementedError",
+    "placeholder",
+    "stub",
+    "coming soon",
+    "dummy implementation",
+)
+_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+_REQUIREMENT_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+(?:\[[^\]]+\])?(?:[<>=!~]=?.+)?$")
+_LINK_PATTERN = re.compile(r"!?(?:\[[^\]]*\])\(([^)]+)\)")
+
+
+@dataclass(frozen=True)
+class AuditIssue:
+    category: str
+    path: str
+    detail: str
+
+    def to_dict(self) -> dict[str, str]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class AuditReport:
+    issues: tuple[AuditIssue, ...]
+    checks: tuple[str, ...] = ()
+
+    @property
+    def ok(self) -> bool:
+        return not self.issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"ok": self.ok, "checks": list(self.checks), "issues": [issue.to_dict() for issue in self.issues]}
+
+    def text(self, heading: str = "RELEASE AUDIT") -> str:
+        lines = [heading, ""]
+        if self.issues:
+            lines.append("RELEASE BLOCKED")
+            lines.extend(f"✗ {issue.path}: {issue.detail}" for issue in self.issues)
+        else:
+            lines.append("RELEASE READY")
+            lines.extend(f"✓ {check}" for check in self.checks)
+        return "\n".join(lines)
+
+
+class ContentAuditor:
+    """Find unfinished release code while allowing explicit, reviewable exceptions."""
+
+    def __init__(self, root: str | Path = ".") -> None:
+        self.root = Path(root).resolve()
+        self.config = self._load_config()
+        self.ignored = tuple(self.config.get("ignore", ()))
+        self.excluded = tuple(self.config.get("exclude", ()))
+
+    def audit(self) -> AuditReport:
+        issues: list[AuditIssue] = []
+        checks: list[str] = []
+        source_files = list(self._source_files())
+        for path in source_files:
+            issues.extend(self._scan_python(path))
+        issues.extend(self._scan_empty_packages())
+        issues.extend(self._scan_empty_readmes())
+        issues = [issue for issue in issues if not self._is_ignored(issue)]
+        checks.append(f"content scanned: {len(source_files)} Python files")
+        checks.append("explicit audit exceptions loaded")
+        return AuditReport(tuple(issues), tuple(checks))
+
+    def _source_files(self) -> Iterable[Path]:
+        for directory in (self.root / "src", self.root / "drivers", self.root / "sdk"):
+            if not directory.exists():
+                continue
+            for path in directory.rglob("*.py"):
+                if any(part in {"__pycache__", ".venv", "build", "dist"} for part in path.parts):
+                    continue
+                relative = self._relative(path)
+                if any(fnmatch.fnmatch(relative, pattern) for pattern in self.excluded):
+                    continue
+                yield path
+
+    def _scan_python(self, path: Path) -> list[AuditIssue]:
+        relative = self._relative(path)
+        issues: list[AuditIssue] = []
+        text = path.read_text(encoding="utf-8")
+        try:
+            tree = ast.parse(text, filename=relative)
+        except SyntaxError as exc:
+            return [AuditIssue("syntax", relative, str(exc))]
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Pass):
+                issues.append(AuditIssue("placeholder", relative, f"pass statement at line {node.lineno}"))
+        for line_number, line in enumerate(text.splitlines(), 1):
+            if path.name == "audit.py":
+                continue
+            lowered = line.lower()
+            for marker in _MARKERS:
+                if marker.lower() in lowered:
+                    issues.append(AuditIssue("placeholder", relative, f"{marker} at line {line_number}"))
+        return issues
+
+    def _scan_empty_packages(self) -> list[AuditIssue]:
+        issues: list[AuditIssue] = []
+        for directory in (self.root / "src", self.root / "drivers", self.root / "sdk"):
+            if not directory.exists():
+                continue
+            for init in directory.rglob("__init__.py"):
+                children = [path for path in init.parent.rglob("*") if path.is_file() and path.name != "__init__.py"]
+                if not children:
+                    issues.append(AuditIssue("empty-package", self._relative(init.parent), "package contains only __init__.py"))
+        return issues
+
+    def _scan_empty_readmes(self) -> list[AuditIssue]:
+        issues: list[AuditIssue] = []
+        candidates = [self.root / "README.md"]
+        docs = self.root / "docs"
+        if docs.exists():
+            candidates.extend(docs.rglob("README.md"))
+        for path in candidates:
+            if path.exists() and not path.read_text(encoding="utf-8").strip():
+                issues.append(AuditIssue("empty-readme", self._relative(path), "README is empty"))
+        return issues
+
+    def _is_ignored(self, issue: AuditIssue) -> bool:
+        value = f"{issue.path}:{issue.category}"
+        marker_value = f"{issue.path}:pass"
+        return any(
+            pattern == issue.path
+            or fnmatch.fnmatch(issue.path, pattern)
+            or fnmatch.fnmatch(value, pattern)
+            or (issue.category == "placeholder" and fnmatch.fnmatch(marker_value, pattern))
+            for pattern in self.ignored
+        )
+
+    def _load_config(self) -> dict[str, list[str]]:
+        path = self.root / "pyproject.toml"
+        if not path.exists():
+            return {}
+        if tomllib is not None:
+            with path.open("rb") as handle:
+                data = tomllib.load(handle)
+            section = data.get("tool", {}).get("rivet", {}).get("audit", {})
+            return {key: list(value) for key, value in section.items() if isinstance(value, list)}
+        return self._fallback_config(path)
+
+    @staticmethod
+    def _fallback_config(path: Path) -> dict[str, list[str]]:
+        result: dict[str, list[str]] = {}
+        active = False
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if line.startswith("["):
+                active = line == "[tool.rivet.audit]"
+                continue
+            if active and "=" in line:
+                key, raw_value = (part.strip() for part in line.split("=", 1))
+                if raw_value.startswith("[") and raw_value.endswith("]"):
+                    try:
+                        value = json.loads(raw_value)
+                    except json.JSONDecodeError:
+                        value = []
+                    if isinstance(value, list):
+                        result[key] = [str(item) for item in value]
+        return result
+
+    def _relative(self, path: Path) -> str:
+        return path.resolve().relative_to(self.root).as_posix()
+
+
+class ReleaseAuditor:
+    """Strict release gate: every failed quality signal becomes a blocking issue."""
+
+    def __init__(self, root: str | Path = ".") -> None:
+        self.root = Path(root).resolve()
+
+    def run(self, run_tests: bool = True, run_build: bool = True) -> AuditReport:
+        issues: list[AuditIssue] = []
+        checks: list[str] = []
+        issues.extend(self._metadata_checks())
+        issues.extend(self._documentation_checks())
+        issues.extend(self._example_checks())
+        content = ContentAuditor(self.root).audit()
+        issues.extend(content.issues)
+        checks.extend(content.checks)
+        if run_tests:
+            issue = self._command_check("tests", [sys.executable, "-m", "pytest", "-q"])
+            if issue:
+                issues.append(issue)
+            else:
+                checks.append("pytest suite")
+        else:
+            checks.append("pytest suite skipped by explicit option")
+        if run_build:
+            issue = self._command_check("package build", [sys.executable, "-m", "build", "--no-isolation"])
+            if issue:
+                issues.append(issue)
+            else:
+                checks.append("wheel and sdist build")
+        else:
+            checks.append("package build skipped by explicit option")
+        return AuditReport(tuple(issues), tuple(checks))
+
+    def _metadata_checks(self) -> list[AuditIssue]:
+        issues: list[AuditIssue] = []
+        pyproject = self.root / "pyproject.toml"
+        if not pyproject.exists():
+            return [AuditIssue("metadata", "pyproject.toml", "package metadata file is missing")]
+        data = self._toml(pyproject)
+        project = data.get("project", {})
+        version = self._version()
+        if not _VERSION_PATTERN.fullmatch(version):
+            issues.append(AuditIssue("metadata", "src/rivet/version.py", f"invalid version: {version!r}"))
+        for required in ("name", "description", "readme", "license"):
+            if not project.get(required):
+                issues.append(AuditIssue("metadata", "pyproject.toml", f"missing project.{required}"))
+        license_path = self.root / "LICENSE"
+        if not license_path.exists() or not license_path.read_text(encoding="utf-8").strip():
+            issues.append(AuditIssue("metadata", "LICENSE", "license metadata file is missing or empty"))
+        for group, requirements in project.get("optional-dependencies", {}).items():
+            for requirement in requirements:
+                if not isinstance(requirement, str) or not _REQUIREMENT_PATTERN.fullmatch(requirement):
+                    issues.append(AuditIssue("dependencies", "pyproject.toml", f"invalid {group} dependency: {requirement!r}"))
+        for schema in (self.root / "sdk" / "schemas").glob("*.json"):
+            try:
+                json.loads(schema.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                issues.append(AuditIssue("schema", self._relative(schema), f"invalid generated schema: {exc}"))
+        return issues
+
+    def _documentation_checks(self) -> list[AuditIssue]:
+        issues: list[AuditIssue] = []
+        documents = [self.root / "README.md"]
+        for directory in (self.root / "docs", self.root / ".github"):
+            if directory.exists():
+                documents.extend(directory.rglob("*.md"))
+        for document in documents:
+            if not document.exists():
+                issues.append(AuditIssue("documentation", self._relative(document), "document is missing"))
+                continue
+            text = document.read_text(encoding="utf-8")
+            for match in _LINK_PATTERN.finditer(text):
+                target = match.group(1).strip().split()[0].strip("<>")
+                if target.startswith(("http://", "https://", "mailto:", "#")):
+                    continue
+                target_path = (document.parent / target.split("#", 1)[0]).resolve()
+                if not target_path.exists():
+                    category = "README asset" if match.group(0).startswith("!") else "documentation"
+                    issues.append(AuditIssue(category, self._relative(document), f"missing link target: {target}"))
+        return issues
+
+    def _example_checks(self) -> list[AuditIssue]:
+        issues: list[AuditIssue] = []
+        examples = self.root / "examples"
+        if not examples.exists():
+            return [AuditIssue("examples", "examples", "examples directory is missing")]
+        for path in examples.rglob("*"):
+            if path.is_file() and path.suffix.lower() == ".json":
+                try:
+                    json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as exc:
+                    issues.append(AuditIssue("examples", self._relative(path), f"invalid JSON example: {exc}"))
+            elif path.is_file() and path.suffix.lower() in {".yaml", ".yml"} and not path.read_text(encoding="utf-8").strip():
+                issues.append(AuditIssue("examples", self._relative(path), "example is empty"))
+        return issues
+
+    def _command_check(self, label: str, command: list[str]) -> AuditIssue | None:
+        try:
+            result = subprocess.run(command, cwd=self.root, capture_output=True, text=True, timeout=900)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return AuditIssue("command", label, f"could not run {' '.join(command)}: {exc}")
+        if result.returncode:
+            output = (result.stdout + "\n" + result.stderr).strip().splitlines()
+            detail = output[-1] if output else f"exit code {result.returncode}"
+            return AuditIssue("command", label, f"failed ({result.returncode}): {detail}")
+        return None
+
+    def _toml(self, path: Path) -> dict[str, Any]:
+        if tomllib is None:
+            return {}
+        with path.open("rb") as handle:
+            return tomllib.load(handle)
+
+    def _version(self) -> str:
+        source = self.root / "src" / "rivet" / "version.py"
+        match = re.search(r"__version__\s*=\s*[\"']([^\"']+)", source.read_text(encoding="utf-8"))
+        return match.group(1) if match else ""
+
+    def _relative(self, path: Path) -> str:
+        return path.resolve().relative_to(self.root).as_posix()

@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Install and run Rivet with its dependency-free simulator"><title>Getting started — Rivet</title><link rel="icon" type="image/svg+xml" href="../assets/rivet-mark.svg"><link rel="stylesheet" href="../styles/site.css"></head>
+<body><main class="page"><nav class="site-nav"><a class="brand" href="../index.html"><img src="../assets/rivet-logo.svg" alt="Rivet robotics infrastructure"></a><div class="nav-links"><a href="architecture.html">Architecture</a><a href="../index.html">Home</a></div></nav><p class="eyebrow">Five minutes to a local run</p><h1>Getting started</h1><p class="lede">Rivet runs without Pi hardware through its deterministic simulator. Install the project, run diagnostics, then explore capabilities and safety boundaries.</p><h2>Install</h2><pre>python -m pip install -e ".[dev]"
+python -m rivet doctor --verbose
+python -m rivet run --simulate</pre><h2>Explore</h2><pre>python -m rivet discover
+python -m rivet tree
+python -m rivet preflight
+python -m rivet run --simulate --fault motion.left-wheel</pre><section class="evidence single"><img src="../assets/rivet-fault-injection.gif" alt="Animated simulator fault injection sequence showing nominal, disconnect, and restored states"></section><h2>Next</h2><p>Use <code>rivet init</code> to create a local JSON configuration, then explore roles, skills, missions, SDK schemas, and the examples in the repository.</p></main></body></html>

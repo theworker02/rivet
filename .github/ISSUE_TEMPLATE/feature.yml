@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a focused, implementable improvement
+title: "feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and use case
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Proposed design and safety impact
+    validations:
+      required: true

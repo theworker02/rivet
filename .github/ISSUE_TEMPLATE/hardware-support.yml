@@ -1,0 +1,23 @@
+name: Hardware support
+description: Request or report a hardware adapter issue
+title: "hardware: "
+labels: [hardware]
+body:
+  - type: input
+    id: platform
+    attributes:
+      label: Raspberry Pi model and OS
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device, bus, and driver
+    validations:
+      required: true
+  - type: textarea
+    id: wiring
+    attributes:
+      label: Wiring and reproduction steps
+    validations:
+      required: true

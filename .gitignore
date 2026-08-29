@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.rover.rivet
+*.rivet
+dist/
+build/
+site-build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+rivet.json

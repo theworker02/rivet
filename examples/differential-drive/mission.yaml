@@ -1,0 +1,9 @@
+mission: inspection-demo
+goal: inspect corridor A
+requirements:
+  role: inspection
+constraints:
+  avoid:
+    - humans
+success:
+  coverage: 0.9

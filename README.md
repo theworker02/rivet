@@ -1,0 +1,308 @@
+<p align="center">
+  <img src="site/assets/rivet-logo.svg" alt="Rivet robotics infrastructure" width="760">
+</p>
+
+<p align="center">
+  <strong>Safety-first infrastructure for adaptive Raspberry Pi robotics.</strong><br>
+  Discover hardware. Build capability. Keep authority explicit.
+</p>
+
+<p align="center">
+  <a href="site/pages/getting-started.html">Getting started</a> ·
+  <a href="site/pages/architecture.html">Architecture</a> ·
+  <a href="docs/architecture.md">Documentation</a> ·
+  <a href="examples/rover.yaml">Example manifest</a>
+</p>
+
+Rivet is an installable Python runtime and capability platform for robots that need a clear boundary between **what hardware exists**, **what the robot is qualified to do**, and **what it is currently allowed to command**. The core runs without Pi hardware through a deterministic simulator, while physical adapters remain explicit integrations rather than hidden claims.
+
+> **Current status:** Rivet `1.2.0` is a verification-gated beta release. Its dependency-free simulator, capability contracts, safety boundary, fault scenarios, role/skill model, recorder, release audit, and package checks run locally and in CI. Physical adapters remain explicit integrations, and Rivet is not a certified safety controller or autonomous authorization system.
+
+## See it run
+
+These visuals are generated from real local Rivet commands and simulator APIs. They are not fabricated robot footage or screenshots of hardware.
+
+<table>
+  <tr>
+    <td width="50%"><img src="site/assets/rivet-doctor.png" alt="Rivet doctor diagnostic output showing a healthy simulated system"></td>
+    <td width="50%"><img src="site/assets/rivet-simulator.png" alt="Rivet simulator capability map showing five simulated capabilities"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><strong>System diagnostics</strong><br><code>python -m rivet doctor --verbose</code></sub></td>
+    <td align="center"><sub><strong>Capability discovery</strong><br><code>python -m rivet run --simulate</code></sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="site/assets/rivet-fault-injection.gif" alt="Animated Rivet simulator fault injection sequence showing nominal, disconnect, and restored states" width="760">
+</p>
+
+<p align="center"><sub>Fault injection is exercised through the same safe-state seams used by the simulator. No physical robot is implied.</sub></p>
+
+## Why Rivet exists
+
+Robotics projects often grow in the wrong direction: applications reach directly into GPIO, device-specific code owns safety policy, and a role description becomes an untestable collection of assumptions. Rivet keeps those concerns visible and composable.
+
+| Question | Rivet boundary |
+| --- | --- |
+| What is connected? | Device contracts, driver registry, capability discovery, and topology |
+| Can this command run? | Authority grants, actuator leases, preflight, and `RivetGuard` |
+| What happens when resources change? | Continuum profiles, lifecycle, governors, provenance, and offline cluster primitives |
+| What is this robot qualified to do? | Roles, SkillGraph evidence, benchmarks, passports, and explicit state transitions |
+| Can a behavior transfer safely? | Synapse stages, embodiment-neutral Motion IR, assumptions, and validation gates |
+| Why was a decision made? | Mission admission, team explanations, EchoMap evidence, and event records |
+
+## The architecture
+
+Rivet is additive. Higher-level capability never bypasses the lower-level authority boundary.
+
+<p align="center">
+  <img src="site/assets/architecture.svg" alt="Rivet layered architecture from applications through Vocation and Continuum to RobotRuntime, safety, and drivers" width="860">
+</p>
+
+```text
+Applications / AI / ROS / Web
+              │
+              ▼
+ VocationRuntime — roles, skills, missions, teams
+              │
+              ▼
+ ContinuumRuntime — profiles, perception, resources, cluster
+              │
+              ▼
+ RobotRuntime — devices, capabilities, authority, leases
+              │
+              ▼
+ physical adapters or dependency-free simulator
+```
+
+### Runtime layers
+
+- **RobotRuntime** is the command boundary. It owns capability registration, authority grants, leases, command dispatch, event publication, and simulator integration.
+- **RivetGuard** is the heartbeat and emergency-stop boundary. Expired heartbeats transition commandable devices to their safe state and revoke active control.
+- **ContinuumRuntime** models resource profiles, lifecycle, perception provenance, hardware topology, offline nodes, and adaptation decisions.
+- **VocationRuntime** composes roles, competency evidence, transfer packages, mission planning, passports, experience marks, and team assignment without replacing runtime safety.
+
+## Install and run
+
+Requires Python 3.10 or newer. The base runtime has no mandatory hardware, vision, or network dependency.
+
+### From a checkout
+
+```bat
+python -m pip install -e ".[dev]"
+python -m rivet doctor --verbose
+python -m rivet run --simulate
+```
+
+On a Unix-like shell, use:
+
+```bash
+python -m pip install -e ".[dev]"
+python -m rivet doctor --verbose
+python -m rivet run --simulate
+```
+
+### First commands
+
+```text
+rivet version                       # print the installed version
+rivet devices                       # list simulated capabilities
+rivet discover                      # inspect capability contracts
+rivet tree                          # render the device tree
+rivet doctor --verbose              # run diagnostics
+rivet preflight                     # validate before motion
+rivet run --simulate                # run the dependency-free backend
+rivet run --simulate --fault motion.left-wheel
+```
+
+Create a local configuration without touching hardware:
+
+```bat
+python -m rivet init rover.json --robot-id atlas-demo
+```
+
+Run the end-to-end Vocation demonstration:
+
+```bat
+python -m rivet vocation-demo
+python -m rivet role evaluate search-rescue
+python -m rivet skill explain construction.drilling
+python -m rivet passport export
+python -m rivet mission explain "search building sector B"
+python -m rivet team organize
+```
+
+## A small Python integration
+
+The public runtime API is deliberately small enough to use from an application, SDK adapter, or test fixture:
+
+```python
+from rivet import RobotRuntime
+from rivet.simulator import SimulatedRobot
+
+runtime = RobotRuntime()
+runtime.register_simulator(SimulatedRobot())
+
+for capability in runtime.discover():
+    print(capability["path"], capability["type"])
+```
+
+Commandable devices still require the normal authority and lease flow. Discovery is not permission:
+
+```python
+grant = runtime.acquire_control("motion", "operator", priority=500, ttl_s=5.0)
+lease = runtime.acquire_lease(
+    "motion.left-wheel", "operator", grant.token, ttl_s=0.25
+)
+runtime.command(
+    "motion.left-wheel", "velocity", 0.35,
+    "operator", grant.token, lease.token,
+)
+```
+
+## What is included
+
+### Hardware abstraction and simulation
+
+- Formal `Device`, `CommandableDevice`, `Driver`, and `DriverRegistry` contracts.
+- Mock GPIO, I²C, SPI, UART, motor, camera, and sensor drivers for deterministic tests.
+- Capability descriptors with command schemas, telemetry, safety policy, and metadata.
+- CRC-protected Rivet Link frame encoding and decoding.
+- Fault injection that removes a simulated device, invokes its safe state, emits a fault event, and supports restoration.
+- Optional physical dependencies kept outside core imports so `import rivet` works on machines without Pi hardware.
+
+### Continuum
+
+- Resource profiles and governor decisions for constrained hosts.
+- Lifecycle and capability request handling.
+- Perception clock, buffers, provenance, confidence, and explainable observations.
+- Hardware graph, offline node registry, assignment, migration, and heartbeat expiry.
+- Diagnostics and preflight checks suitable for local development and CI.
+
+### Vocation
+
+- Role definitions with hardware requirements, competencies, policies, and prohibited actions.
+- Qualification states: `candidate → trained → validated → authorized`.
+- SkillGraph evidence with prerequisites, curricula, benchmark records, confidence decay, and history.
+- Synapse packages that transfer intent, assumptions, failure modes, and validation requirements.
+- Embodiment-neutral Motion IR lowered through the existing runtime command boundary.
+- Signed-style Rivet Passport exports using dependency-free HMAC in the prototype.
+- Mission decomposition, admission checks, explanations, and competence-based team assignment.
+- EchoMap experience marks with evidence and sensor provenance.
+
+## Qualification is not authority
+
+A role evaluation reports compatibility. It does not authorize motion.
+
+```text
+candidate ──training──▶ trained ──validation──▶ validated ──operator decision──▶ authorized
+                                                                                  │
+                                                                                  ▼
+                                                        still subject to Guard, leases, and preflight
+```
+
+A passport qualification is evidence. It is not an actuator token, lease, emergency-stop bypass, production identity, or permission to perform prohibited actions.
+
+## Examples
+
+| Example | Demonstrates |
+| --- | --- |
+| [`examples/differential-drive`](examples/differential-drive) | Discovery, authority, actuator lease, command, and safe expiry |
+| [`examples/robot-arm`](examples/robot-arm) | Motion IR and a future manipulation-driver boundary without hardware claims |
+| [`examples/camera-rover`](examples/camera-rover) | Camera capability metadata and perception provenance |
+| [`examples/pico-bridge`](examples/pico-bridge) | Rivet Link framing and a deterministic UART boundary |
+| [`examples/role-assignment`](examples/role-assignment) | Role evaluation and prerequisite-aware skills |
+| [`examples/rover.yaml`](examples/rover.yaml) | A compact robot manifest for local experimentation |
+
+Run the differential-drive example:
+
+```bat
+set PYTHONPATH=src
+python examples\differential-drive\main.py
+```
+
+## Repository map
+
+```text
+src/rivet/
+├── runtime.py             command, authority, lease, and event boundary
+├── device.py              device and capability contracts
+├── driver.py              driver protocol and registry
+├── protocol.py            CRC-protected Rivet Link frames
+├── configuration.py       JSON configuration loader
+├── storage.py             atomic local JSON storage
+├── simulator.py            dependency-free reference robot
+├── faults.py              simulation-only fault injection
+├── continuum.py           profiles, governor, and lifecycle
+├── guard.py               heartbeat safety boundary and estop
+├── perception.py          provenance, buffers, and explainable insight
+├── cluster.py             offline node registry and migration
+├── vocation.py            roles and qualification transitions
+├── skills.py              SkillGraph, curricula, evidence, and decay
+├── benchmarks.py          RivetBench result catalog
+├── synapse.py             transferable skill-package stages
+├── motion_ir.py           embodiment-neutral intent and executor
+├── passport.py             signed-style qualification export
+├── echomap.py             explainable spatial experience marks
+├── mission.py             decomposition, admission, and explanation
+├── team.py                competence-based team assignment
+├── vocation_runtime.py    Phase III composition layer
+└── cli.py                 public `rivet` command surface
+
+drivers/                   reference and mock hardware adapters
+sdk/                       schemas and thin SDK examples
+cli/                       CLI extraction boundary documentation
+examples/                  runnable simulator-first examples
+docs/                      structured project documentation
+site/                      static public documentation and brand assets
+tools/                    developer, release, site, and media tooling
+tests/                    unit, integration, protocol, hardware, and simulation tests
+```
+
+## Development and release checks
+
+Install developer tooling and run the normal gate:
+
+```bat
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check src tests drivers sdk
+python -m mypy src
+python -m compileall -q src drivers sdk tests
+python tools\dev.py check
+python tools\site\build.py
+```
+
+Regenerate the visual evidence after changing simulator or diagnostic output:
+
+```bat
+python tools\media\generate.py
+```
+
+The release artifacts are built with:
+
+```bat
+python -m build --no-isolation --wheel
+python -m build --no-isolation --sdist
+```
+
+The static site source is copied to `site-build/` for Pages deployment. Generated output is not hand-edited.
+
+## Safety, scope, and honesty
+
+Rivet is intentionally explicit about what it does not provide yet:
+
+- No claim of production Raspberry Pi hardware support for every adapter listed here.
+- No unconditional import of `RPi.GPIO`, libcamera, serial, or vision libraries.
+- No autonomous certification of dangerous capabilities.
+- No medical-procedure, covert-surveillance, radiation, or hazardous-material automation.
+- No production cryptographic device identity; the passport signer is a local prototype seam.
+- No process-isolated safety service or certified emergency-stop implementation.
+- No fake screenshots, stock robot footage, or fabricated hardware benchmarks: the visuals in this README are generated from actual local simulator/diagnostic runs.
+
+For contribution standards, security reporting, governance, and the project roadmap, see [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md), [`GOVERNANCE.md`](GOVERNANCE.md), and [`ROADMAP.md`](ROADMAP.md).
+
+## License
+
+Rivet is released under the [MIT License](LICENSE). Hardware deployments remain responsible for their own electrical, mechanical, operational, and regulatory safety review.

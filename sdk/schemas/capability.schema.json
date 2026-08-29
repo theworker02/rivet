@@ -1,0 +1,14 @@
+{
+  "title": "Rivet Capability Contract",
+  "type": "object",
+  "required": ["path", "type", "version", "commands", "telemetry", "safety"],
+  "properties": {
+    "path": {"type": "string", "pattern": "^[^.]+\\..+"},
+    "type": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1},
+    "commands": {"type": "object"},
+    "telemetry": {"type": "object"},
+    "safety": {"type": "object"},
+    "metadata": {"type": "object"}
+  }
+}
