@@ -162,7 +162,7 @@ class CapabilityLifecycle:
 
 
 class ContinuumRuntime:
-    """Phase II composition layer around the original RobotRuntime."""
+    """Continuum composition layer around the original RobotRuntime."""
 
     def __init__(self, runtime: RobotRuntime | None = None, clock: Callable[[], float] | None = None) -> None:
         self.runtime = runtime or RobotRuntime(clock=clock)

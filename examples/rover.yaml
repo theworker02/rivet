@@ -1,5 +1,5 @@
-# Continuum manifest shape for a future `rivet apply` command.
-# The current prototype registers the equivalent simulated devices in Python.
+# Reference manifest for the Continuum and Vocation layers.
+# Core startup currently consumes versioned JSON; this YAML is kept as a documented input shape.
 robot: rover-continuum
 
 compute:
@@ -105,7 +105,7 @@ cluster:
       preferred_node: pi-vision
       fallback_node: pi-main
 
-# Phase III Vocation configuration shape.
+# Vocation configuration shape for roles, skills, missions, and evidence.
 vocation:
   robot:
     id: atlas-07

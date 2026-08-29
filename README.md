@@ -341,12 +341,11 @@ src/rivet/
 ├── echomap.py             explainable spatial experience marks
 ├── mission.py             decomposition, admission, and explanation
 ├── team.py                competence-based team assignment
-├── vocation_runtime.py    Phase III composition layer
+├── vocation_runtime.py    Vocation composition layer
 ├── cli.py                  public `rivet` command surface
 
 drivers/                   reference and mock hardware adapters
 sdk/                       schemas and thin SDK examples
-cli/                       CLI extraction boundary documentation
 examples/                  runnable simulator-first examples
 docs/                      structured project documentation
 site/                      static public documentation and brand assets
@@ -379,8 +378,8 @@ The release artifacts are built with:
 
 ```bat
 python -m pip install "setuptools==81.0.0"
-python -m build --no-isolation --wheel
-python -m build --no-isolation --sdist
+python -m build --no-isolation --skip-dependency-check --wheel
+python -m build --no-isolation --skip-dependency-check --sdist
 ```
 
 The static site source is copied to `site-build/` for Pages deployment. Generated output is not hand-edited.

@@ -1,4 +1,25 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Rivet layered architecture and safety boundaries"><title>Architecture — Rivet</title><link rel="icon" type="image/svg+xml" href="../assets/rivet-mark.svg"><link rel="stylesheet" href="../styles/site.css"></head>
-<body><main class="page"><nav class="site-nav"><a class="brand" href="../index.html"><img src="../assets/rivet-logo.svg" alt="Rivet robotics infrastructure"></a><div class="nav-links"><a href="getting-started.html">Get started</a><a href="../index.html">Home</a></div></nav><p class="eyebrow">How Rivet stays composable</p><h1>Architecture</h1><p class="lede">Higher-level capability describes intent and competence; RobotRuntime, leases, preflight, and Rivet Guard remain the command authority.</p><figure class="architecture-figure"><img src="../assets/architecture.svg" alt="Rivet layered architecture from applications through Vocation and Continuum to RobotRuntime, safety, and drivers"><figcaption>Applications connect through Vocation and Continuum to the guarded RobotRuntime boundary.</figcaption></figure><section class="content-grid"><article><h2>Safety first</h2><p>Vocation and Continuum never bypass RobotRuntime authority, actuator leases, preflight, or Rivet Guard. The simulator exercises the same seams used by future drivers.</p></article><article><h2>Explicit integrations</h2><p>GPIO, camera, serial, vision, fleet transport, process isolation, and hardware-backed identity remain opt-in integration boundaries rather than hidden runtime assumptions.</p></article></section></main></body></html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Rivet 1.2.0 layered architecture and safety boundaries">
+  <title>Architecture — Rivet 1.2.0</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/rivet-mark.svg">
+  <link rel="stylesheet" href="../styles/site.css">
+</head>
+<body>
+  <main class="page">
+    <nav class="site-nav"><a class="brand" href="../index.html"><img src="../assets/rivet-logo.svg" alt="Rivet robotics infrastructure"></a><div class="nav-links"><a href="getting-started.html">Get started</a><a href="../index.html">Home</a></div></nav>
+    <p class="eyebrow">Rivet 1.2.0 · verification-gated Beta</p>
+    <h1>Architecture</h1>
+    <p class="lede">Higher-level capability describes intent and competence; RobotRuntime, typed contracts, leases, preflight, and Rivet Guard remain the command authority.</p>
+    <figure class="architecture-figure"><img src="../assets/architecture.svg" alt="Rivet layered architecture from applications through Vocation and Continuum to RobotRuntime, safety, and drivers"><figcaption>Applications connect through Vocation and Continuum to the guarded RobotRuntime boundary.</figcaption></figure>
+    <section class="content-grid">
+      <article><h2>Safety first</h2><p>Vocation, missions, Capsules, and AI integrations never bypass RobotRuntime authority, actuator leases, preflight, or Rivet Guard. Reflex and fault domains provide bounded containment; they do not certify physical safety.</p></article>
+      <article><h2>Evidence before promises</h2><p>The simulator exercises discovery, capability health, command and telemetry, recorder/replay, graceful shutdown, and 18 named end-to-end scenarios. <code>rivet check-release</code> also checks metadata, docs, assets, examples, schemas, tests, and package builds.</p></article>
+      <article><h2>Explicit integrations</h2><p>GPIO, camera, serial, vision, fleet transport, process isolation, production identity, and hardware-backed safety remain opt-in integration boundaries rather than hidden runtime assumptions.</p></article>
+    </section>
+  </main>
+</body>
+</html>

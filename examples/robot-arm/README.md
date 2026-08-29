@@ -1,5 +1,10 @@
-<p align="center"><img src="../../site/assets/rivet-logo.svg" alt="Rivet robotics infrastructure" width="520"></p>
+# Robot arm intent example
 
-# Robot arm extension point
+The `motion-plan.json` file is an embodiment-neutral intent input. `EmbodimentCompiler` validates that a plan has operations before a runtime-specific executor lowers it to the existing command boundary. No physical arm is included or claimed; use simulator contracts and a qualified adapter before connecting hardware.
 
-This example directory documents how a future arm driver would expose manipulation capabilities and consume Motion IR. No unsupported physical arm is claimed; use `GenericPwmMotor` and simulator contracts for tests until a maintained arm adapter exists.
+Validate the package and inspect the public motion surface with:
+
+```bat
+python -m rivet verify
+python -m rivet discover
+```

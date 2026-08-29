@@ -494,7 +494,7 @@ def parser() -> argparse.ArgumentParser:
     record_start = record_commands.add_parser("start")
     record_start.add_argument("path", type=Path)
     record_start.set_defaults(func=cmd_record_start)
-    commands.add_parser("continuum-demo", help="run the Phase II adaptive runtime demo").set_defaults(func=cmd_continuum_demo)
+    commands.add_parser("continuum-demo", help="run the adaptive Continuum runtime demo").set_defaults(func=cmd_continuum_demo)
     doctor = commands.add_parser("doctor", help="run Rivet system diagnostics")
     doctor.add_argument("--verbose", action="store_true", help="include detailed check output")
     doctor.set_defaults(func=cmd_doctor)
@@ -527,7 +527,7 @@ def parser() -> argparse.ArgumentParser:
     release.add_argument("--json", action="store_true", help="emit a machine-readable report")
     release.set_defaults(func=cmd_check_release)
     commands.add_parser("nodes", help="show the offline cluster node registry").set_defaults(func=cmd_nodes)
-    commands.add_parser("vocation-demo", help="run the Phase III role, skill, mission, and passport demo").set_defaults(func=cmd_vocation_demo)
+    commands.add_parser("vocation-demo", help="run the Vocation role, skill, mission, and passport demo").set_defaults(func=cmd_vocation_demo)
 
     role = commands.add_parser("role", help="evaluate or adopt a robot role")
     role_commands = role.add_subparsers(dest="role_command", required=True)

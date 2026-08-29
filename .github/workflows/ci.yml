@@ -23,4 +23,5 @@ jobs:
       - run: python -m compileall -q src drivers sdk tests
       - run: python -m rivet version
       - run: python -m rivet run --simulate --fault motion.left-wheel
-      - run: python -m build --no-isolation
+      - run: python -m build --no-isolation --skip-dependency-check --wheel
+      - run: python -m build --no-isolation --skip-dependency-check --sdist

@@ -40,7 +40,7 @@ class EmbodimentCompiler:
 
 
 class MotionExecutor:
-    """The only Phase III adapter that can lower motion intent to RobotRuntime."""
+    """The only Vocation adapter that can lower motion intent to RobotRuntime."""
 
     def __init__(self, runtime: RobotRuntime) -> None:
         self.runtime = runtime

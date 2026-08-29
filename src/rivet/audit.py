@@ -242,10 +242,15 @@ class ReleaseAuditor:
         else:
             checks.append("pytest suite skipped by explicit option")
         if run_build:
-            issue = self._command_check("package build", [sys.executable, "-m", "build", "--no-isolation"])
-            if issue:
-                issues.append(issue)
-            else:
+            build_commands = (
+                [sys.executable, "-m", "build", "--no-isolation", "--skip-dependency-check", "--wheel"],
+                [sys.executable, "-m", "build", "--no-isolation", "--skip-dependency-check", "--sdist"],
+            )
+            build_issues = [self._command_check("package build", command) for command in build_commands]
+            for issue in build_issues:
+                if issue:
+                    issues.append(issue)
+            if not any(build_issues):
                 checks.append("wheel and sdist build")
         else:
             checks.append("package build skipped by explicit option")
@@ -264,16 +269,28 @@ class ReleaseAuditor:
         for required in ("name", "description", "readme", "license"):
             if not project.get(required):
                 issues.append(AuditIssue("metadata", "pyproject.toml", f"missing project.{required}"))
+        classifiers = project.get("classifiers", [])
+        if "Development Status :: 4 - Beta" not in classifiers:
+            issues.append(AuditIssue("metadata", "pyproject.toml", "package must declare Development Status :: 4 - Beta"))
+        if "Development Status :: 3 - Alpha" in classifiers:
+            issues.append(AuditIssue("metadata", "pyproject.toml", "package still declares Alpha status"))
         license_path = self.root / "LICENSE"
         if not license_path.exists() or not license_path.read_text(encoding="utf-8").strip():
             issues.append(AuditIssue("metadata", "LICENSE", "license metadata file is missing or empty"))
         generated = self.root / "src" / "rivet_robot_runtime.egg-info" / "PKG-INFO"
-        if generated.exists():
+        if not generated.exists():
+            issues.append(AuditIssue("metadata", self._relative(generated), "generated package metadata is missing; run the package metadata build"))
+        else:
             generated_text = generated.read_text(encoding="utf-8")
             if f"Version: {version}" not in generated_text:
                 issues.append(AuditIssue("metadata", self._relative(generated), "generated package version is stale"))
+            if "Classifier: Development Status :: 4 - Beta" not in generated_text:
+                issues.append(AuditIssue("metadata", self._relative(generated), "generated package is missing Beta status"))
             if "Development Status :: 3 - Alpha" in generated_text:
                 issues.append(AuditIssue("metadata", self._relative(generated), "generated package still declares Alpha status"))
+        entry_points = self.root / "src" / "rivet_robot_runtime.egg-info" / "entry_points.txt"
+        if not entry_points.exists() or "rivet-dev = rivet.dev_cli:main" not in entry_points.read_text(encoding="utf-8"):
+            issues.append(AuditIssue("metadata", self._relative(entry_points), "rivet-dev console entry point is missing"))
         for group, requirements in project.get("optional-dependencies", {}).items():
             for requirement in requirements:
                 if not isinstance(requirement, str) or not _REQUIREMENT_PATTERN.fullmatch(requirement):
@@ -287,23 +304,45 @@ class ReleaseAuditor:
 
     def _documentation_checks(self) -> list[AuditIssue]:
         issues: list[AuditIssue] = []
-        documents = [self.root / "README.md"]
-        for directory in (self.root / "docs", self.root / ".github"):
-            if directory.exists():
-                documents.extend(directory.rglob("*.md"))
+        ignored_parts = {".git", ".venv", "venv", "build", "dist", ".pytest_cache", ".mypy_cache", ".ruff_cache", "__pycache__"}
+        documents = sorted(path for path in self.root.rglob("*.md") if not any(part in ignored_parts for part in path.parts))
         for document in documents:
-            if not document.exists():
-                issues.append(AuditIssue("documentation", self._relative(document), "document is missing"))
-                continue
             text = document.read_text(encoding="utf-8")
             for match in _LINK_PATTERN.finditer(text):
                 target = match.group(1).strip().split()[0].strip("<>")
                 if target.startswith(("http://", "https://", "mailto:", "#")):
                     continue
-                target_path = (document.parent / target.split("#", 1)[0]).resolve()
+                clean_target = target.split("#", 1)[0].split("?", 1)[0]
+                if not clean_target:
+                    continue
+                target_path = (document.parent / clean_target).resolve()
                 if not target_path.exists():
                     category = "README asset" if match.group(0).startswith("!") else "documentation"
                     issues.append(AuditIssue(category, self._relative(document), f"missing link target: {target}"))
+
+        html_pattern = re.compile(r'''(?:href|src)\s*=\s*["']([^"']+)["']''', re.IGNORECASE)
+        html_documents = sorted(path for path in self.root.rglob("*.html") if not any(part in ignored_parts for part in path.parts))
+        for document in html_documents:
+            text = document.read_text(encoding="utf-8")
+            for match in html_pattern.finditer(text):
+                target = match.group(1).strip()
+                if target.startswith(("http://", "https://", "mailto:", "#", "data:", "javascript:")):
+                    continue
+                clean_target = target.split("#", 1)[0].split("?", 1)[0]
+                if not clean_target:
+                    continue
+                target_path = (document.parent / clean_target).resolve()
+                if not target_path.exists():
+                    issues.append(AuditIssue("site asset", self._relative(document), f"missing HTML target: {target}"))
+
+        for path in (self.root / "README.md", self.root / "site" / "index.html"):
+            if not path.exists():
+                continue
+            text = path.read_text(encoding="utf-8").lower()
+            if "1.2.0" not in text:
+                issues.append(AuditIssue("documentation", self._relative(path), "release status does not identify Rivet 1.2.0"))
+            if "verification-gated" not in text:
+                issues.append(AuditIssue("documentation", self._relative(path), "release status is missing verification-gated wording"))
         return issues
 
     def _example_checks(self) -> list[AuditIssue]:

@@ -13,7 +13,7 @@ from .vocation import RoleCatalog, RoleManager, RoleSpec
 
 
 class VocationRuntime:
-    """Phase III composition layer above ContinuumRuntime."""
+    """Vocation composition layer above ContinuumRuntime."""
 
     def __init__(self, continuum: Any, catalog: RoleCatalog | None = None, skills: SkillGraph | None = None, signer: PassportSigner | None = None) -> None:
         self.continuum = continuum

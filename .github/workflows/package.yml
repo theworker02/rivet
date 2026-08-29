@@ -1,0 +1,35 @@
+name: Package validation
+
+on:
+  push:
+    paths:
+      - "src/**"
+      - "drivers/**"
+      - "sdk/**"
+      - "README.md"
+      - "LICENSE"
+      - "pyproject.toml"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install "setuptools==81.0.0" "build==1.2.2.post1" "pytest==8.3.5"
+      - run: python -m pip install --no-deps -e .
+      - run: python -m rivet check-release
+      - run: python -m build --no-isolation --skip-dependency-check --wheel
+      - run: python -m build --no-isolation --skip-dependency-check --sdist
+      - name: Inspect distribution metadata
+        run: |
+          python -c "import glob, zipfile; wheels=glob.glob('dist/*.whl'); assert len(wheels) == 1; z=zipfile.ZipFile(wheels[0]); text=z.read('rivet_robot_runtime-1.2.0.dist-info/METADATA').decode(); assert 'Version: 1.2.0' in text and 'Development Status :: 4 - Beta' in text"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rivet-distributions
+          path: dist/

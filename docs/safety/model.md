@@ -1,6 +1,6 @@
 # Safety model
 
-Rivet 1.2 keeps safety below roles, missions, and AI:
+Rivet 1.2.0 keeps safety below roles, missions, and AI:
 
 1. typed capability contracts reject unsupported commands and out-of-range values;
 2. preflight reports readiness before motion;

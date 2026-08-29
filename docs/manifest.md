@@ -1,6 +1,6 @@
 # Versioned configuration
 
-Rivet 1.2 uses schema version 2. `rivet init` writes canonical JSON:
+Rivet 1.2.0 uses schema version 2. `rivet init` writes canonical JSON:
 
 ```bat
 python -m rivet init rover.json --robot-id rover-01

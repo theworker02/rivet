@@ -27,3 +27,19 @@ python -m rivet check-release
 ```
 
 The release gate blocks on failing tests, stale package metadata, broken local links/assets, invalid examples/schemas, unfinished release code, or an unbuildable wheel/sdist. Physical hardware tests are never inferred from simulator PASS results.
+
+
+## Developer tooling and evidence
+
+The canonical developer entry points are executable rather than placeholder extraction folders:
+
+```bat
+python tools\dev.py check
+rivet-dev audit-content
+python tools\dev.py release-check
+python -m rivet resource-test
+python -m rivet benchmark runtime
+python tools\site\build.py
+```
+
+`rivet-dev audit-content` scans source Python in `src/`, `drivers/`, and `sdk/` for unfinished markers and empty packages, with only explicit exceptions in `[tool.rivet.audit]`. `rivet check-release` additionally validates generated package metadata, the `rivet-dev` entry point, Markdown links, static-site HTML assets, examples, schemas, tests, and wheel/sdist creation. A skipped check is diagnostic output, not release evidence.

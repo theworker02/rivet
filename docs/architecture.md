@@ -1,6 +1,6 @@
-# Rivet 1.2 architecture
+# Rivet 1.2.0 architecture
 
-Rivet is layered so capability growth cannot bypass command safety or release evidence:
+Rivet `1.2.0` keeps the detailed runtime boundaries below the release verification plane:
 
 ```text
 Applications / AI / SDKs
