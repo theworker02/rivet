@@ -1,102 +1,180 @@
-# Acquisition â€” rivet
+# Acquisition Brief â€” rivet
 
-**Status:** Diligence / sales briefing only. **No acquisition has occurred** by virtue of this file.  
-**License:** Proprietary â€” sale or written commercial license required (see `LICENSE`).  
-**Valuation:** Not stated herein.  
+**Date:** 2026-09-22  
+**Repository:** https://github.com/theworker02/rivet  
+**Default branch:** `main`  
+**Primary language:** Python  
+**Status:** Diligence briefing only. **No acquisition has occurred** by virtue of this file.  
+**License:** Proprietary â€” sale, written commercial license, or completed asset transfer required (see root `LICENSE`).  
+**Valuation:** Not stated.  
 **Contact:** GitHub [@theworker02](https://github.com/theworker02) Â· [thanks.dev/u/gh/theworker02](https://thanks.dev/u/gh/theworker02)
 
-> This repository is **not open source**. Cloning or forking does **not** grant production, redistribution, SaaS, or commercial rights.
+> Cloning or forking this repository does **not** grant production, redistribution, SaaS, OEM, or commercial rights.
 
 ---
 
-## Summary
+## 1. Executive thesis
+
+<img src="site/assets/rivet-logo.svg" alt="Rivet robotics infrastructure" width="760"> <strong>Safety-first infrastructure for adaptive Raspberry Pi robotics.</strong><br> Discover hardware. Build capability. Keep authority explicit.
+
+**Why a buyer cares:** rivet packages transferable product IP â€” source, docs, in-repo brand assets, and a diligence room under `docs/acquisition/` â€” under a clear proprietary posture so diligence can proceed without mistaking the repo for open source.
+
+---
+
+## 2. Product snapshot
 
 | Item | Detail |
 |------|--------|
 | Product | rivet |
-| Repository | https://github.com/theworker02/rivet |
-| License type | Proprietary â€” sale / acquisition / commercial license required |
-| Open source? | **No** |
+| Repo | `theworker02/rivet` |
+| Language | Python |
+| Open source? | **No** â€” proprietary |
 | Rightsholder | theworker02 |
-| Primary language | Python |
+| Diligence pack | `docs/acquisition/` |
 
-## Product
+### Capability highlights (from current materials)
 
-Rivet is an installable, safety-first adaptive robot runtime and capability-development platform for Raspberry Pi robotics. It gives applications one local boundary for hardware discovery, deterministic safety, resource adaptation, perception provenance, robot specialization, mission planning, and auditable competence.
-
----
-
-## How to purchase or acquire
-
-1. Contact [@theworker02](https://github.com/theworker02) (or [thanks.dev](https://thanks.dev/u/gh/theworker02)).
-2. Describe intended use: seats, deployment model, redistribution / OEM needs, or corporate IP acquisition.
-3. Execute NDA if requested for deeper diligence materials.
-4. Receive quote and commercial license **or** definitive purchase / asset-transfer terms.
-5. Complete payment and closing as agreed; receive entitlement / transfer confirmation.
-
-Until a paid license or completed acquisition is in place, **do not** deploy this Product commercially, redistribute it, or offer it as a hosted service.
-
----
-
-## Typical commercial structures
-
-| Structure | When it fits |
-|-----------|----------------|
-| **Commercial license** (non-exclusive) | Run/deploy under seat or deployment terms |
-| **Exclusive license** | Field-of-use exclusivity; seller may retain shell entity |
-| **Asset / IP sale** | Buyer wants materials and IP assigned outright |
-| **OEM / reseller** | Embedding or redistribution â€” separate agreement |
-
-Exact pricing, earnouts, and escrow are negotiated under NDA with counsel. **No forged or executed deal docs are implied by this file.**
+- **Verification pipeline:** `rivet verify` checks configuration, startup, driver discovery, capability registration and health, safety, roles, skills, missions, simulation, command/telemetry, recorder/replay, and graceful shutdown.
+- **Executable reliability scenarios:** 18 simulator scenarios cover boot, discovery, role assignment, mission admission, sensor recovery, watchdogs, resource pressure, recording/replay, multi-robot coordination, dry runs, Reflex, Pulse, Capsules, and fault-domain isolation.
+- **Operational signals:** capability health, Pulse heartbeats, bounded recovery, fault domains, typed units, configuration migration, mission checkpoints, compensation, sanitized support bundles, and compatibility/resource checks.
+- **Release quality gates:** `rivet check-release` and `rivet-dev audit-content` validate tests, documentation links/assets, examples, schemas, metadata, package artifacts, and unfinished release content.
+- **Documentation and packaging:** the README, static site, architecture material, driver evidence, simulator workflows, safety boundaries, and installable wheel/sdist were updated for the Beta release.
+- **RobotRuntime** is the command boundary. It owns capability registration, authority grants, leases, command dispatch, event publication, and simulator integration.
+- **RivetGuard** is the heartbeat and emergency-stop boundary. Expired heartbeats transition commandable devices to their safe state and revoke active control.
+- **ContinuumRuntime** models resource profiles, lifecycle, perception provenance, hardware topology, offline nodes, and adaptation decisions.
+- **VocationRuntime** composes roles, competency evidence, transfer packages, mission planning, passports, experience marks, and team assignment without replacing runtime safety.
+- Formal `Device`, `CommandableDevice`, `Driver`, and `DriverRegistry` contracts.
+- Mock GPIO, IÃ‚Â²C, SPI, UART, motor, camera, and sensor drivers for deterministic tests.
+- Capability descriptors with command schemas, telemetry, safety policy, and metadata.
 
 ---
 
-## What a buyer typically receives
+## 3. Problem / opportunity
+
+Teams evaluating rivet typically need either (a) a commercial right to run or embed it, or (b) outright ownership of the Product IP for strategic build-out. Public GitHub visibility without a proprietary license creates false assumptions about free production use. This brief and the linked data room make the commercial path explicit.
+
+---
+
+## 4. What ships today
+
+Honest maturity: treat repository contents, README claims, tests, and release tags as the source of truth. Do not assume production customers, ARR, filed patents, or SLAs unless separately evidenced in diligence.
+
+Typical transferable surfaces:
+
+- Source tree and build/test scripts present in-repo
+- Documentation and design notes
+- Acquisition / diligence markdown under `docs/acquisition/`
+- Branding assets committed to the repository (if any)
+
+---
+
+## 5. Demo / evaluation path (buyer)
+
+Minimal path (no secrets required unless README says otherwise):
+
+```
+```bat
+python -m pip install --upgrade rivet-robot-runtime==1.2.0
+rivet version --verbose
+rivet verify
+```
+```bat
+rivet --help
+rivet-dev --help
+rivet-dev audit-content
+```
+```bat
+python -m pip install --upgrade rivet-robot-runtime
+python -m rivet version
+```
+```text
+rivet_robot_runtime-1.2.0-py3-none-any.whl
+5ee535e3d61e802f71a37defdacf6e3dcb2a50ed8a846e2eab84ef5103e30040
+
+rivet_robot_runtime-1.2.0.tar.gz
+4845c873f25eeefde0f4d27663a165f5c3f731231c1f5309dadb829902a4b3e3
+```
+```bat
+certutil -hashfile rivet_robot_runtime-1.2.0-py3-none-any.whl SHA256
+certutil -hashfile rivet_robot_runtime-1.2.0.tar.gz SHA256
+```
+```bash
+sha256sum rivet_robot_runtime-1.2.0-py3-none-any.whl
+sha256sum rivet_robot_runtime-1.2.0.tar.gz
+```
+```text
+Applications / AI / ROS / Web
+              Ã¢â€â€š
+              Ã¢â€“Â¼
+ VocationRuntime Ã¢â‚¬â€ roles, skills, missions, teams
+              Ã¢â€â€š
+              Ã¢â€“Â¼
+ ContinuumRuntime Ã¢â‚¬â€ profiles, perception, resources, cluster
+              Ã¢â€â€š
+              Ã¢â€“Â¼
+ RobotRuntime Ã¢â‚¬â€ devices, capabilities, authority, leases
+```
+
+Extended evaluation: `docs/acquisition/BUYER_EVALUATION.md`. Written NDA / evaluation grants may be required for private materials.
+
+---
+
+## 6. What a transaction typically includes
 
 Subject to definitive schedules:
 
-- Repository materials and original Product IP asserted by Rightsholder
-- Documentation and diligence artifacts present at closing
-- Branding / naming as assigned in the agreement
-
-**Typically excluded unless listed:** seller personal accounts, unrelated repos, third-party dependency source under separate licenses, secrets without a rotation plan, fabricated revenue/user metrics.
-
----
-
-## Evaluation
-
-Time-limited evaluation may be offered **in writing only** (often under NDA). Evaluation is non-production unless expressly stated, non-transferable, and does not authorize redistribution or public SaaS hosting.
+| Included (typical) | Excluded (typical) |
+|--------------------|--------------------|
+| Repo materials + asserted original IP | Seller personal accounts / unrelated repos |
+| Docs + diligence room at closing | Third-party dependency source under separate licenses |
+| In-repo brand marks as assigned | Secrets without rotation plan |
+| Know-how captured in docs | Fabricated revenue, user, or adoption metrics |
 
 ---
 
-## Diligence starting checklist (buyer)
+## 7. Suggested deal structures
+
+| Structure | When it fits |
+|-----------|--------------|
+| Non-exclusive commercial license | Deploy/run under seat or environment terms |
+| Exclusive field-of-use license | Buyer wants exclusivity; seller may retain entity |
+| Asset / IP assignment | Buyer wants ownership of Materials outright |
+| OEM / redistribution | Separate agreement â€” not implied here |
+
+Commercial terms (price, earnouts, escrow) are negotiated under NDA with counsel.
+
+---
+
+## 8. Buyer diligence checklist
 
 - [ ] Confirm Rightsholder identity and authority to sell/license
-- [ ] Inventory Materials (repo, docs, demos â€” no secrets without rotation)
-- [ ] Implementation maturity: vision vs prototype vs production-ready
-- [ ] Third-party OSS / cloud ToS constraints
-- [ ] Trademark / domain / naming conflicts
-- [ ] Contributor IP assignment chain
-- [ ] Post-close LICENSE supersession and public-repo disposition
+- [ ] Inventory Materials (`docs/acquisition/ASSET_INVENTORY.md`)
+- [ ] Review IP posture (`IP_PROVENANCE.md`) and dependencies (`DEPENDENCY_INVENTORY.md`)
+- [ ] Run evaluation script (`BUYER_EVALUATION.md`)
+- [ ] Review risks (`RISK_REGISTER.md`)
+- [ ] Agree transfer scope (`TRANSFER_MANIFEST.md`) and handoff (`HANDOFF_CHECKLIST.md`)
+- [ ] Supersede root `LICENSE` at closing via definitive agreement
 
 ---
 
-## Related files
+## 9. Related documents
 
 | Document | Purpose |
 |----------|---------|
-| `LICENSE` | Proprietary â€” no default grant until sale/license |
-| `.github/FUNDING.yml` | Sponsors / thanks.dev |
+| `LICENSE` | Proprietary â€” no default grant |
+| `docs/acquisition/README.md` | Data-room index |
+| `docs/acquisition/EXECUTIVE_SUMMARY.md` | One-page thesis |
 | `README.md` | Product overview |
-| `SECURITY.md` | Vulnerability reporting (if present) |
-| `acquisition/` or `docs/acquisition/` | Expanded data room (if present) |
+| `SECURITY.md` | Vulnerability reporting |
+| `COMMERCIAL.md` | Licensing contact path |
+| `.github/FUNDING.yml` | Sponsors / thanks.dev |
 
 ---
 
-## Disclaimer
+## 10. Disclaimer
 
-This document is **informational** and does **not** create a binding offer, grant of rights, or investment advice. Engage counsel for any transaction.
+This package is informational and **does not** create a binding offer, grant of rights, or investment advice. Engage counsel for any transaction.
 
 ---
 
-*Document version: 1.0.0 / 2026-09-22 Â· Classification: acquisition briefing*
+*Document version: 2.0.0 / 2026-09-22 Â· Classification: acquisition briefing*
