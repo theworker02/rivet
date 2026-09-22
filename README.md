@@ -8,9 +8,9 @@
 </p>
 
 <p align="center">
-  <a href="site/pages/getting-started.html">Getting started</a> ·
-  <a href="site/pages/architecture.html">Architecture</a> ·
-  <a href="docs/architecture.md">Documentation</a> ·
+  <a href="site/pages/getting-started.html">Getting started</a> Â·
+  <a href="site/pages/architecture.html">Architecture</a> Â·
+  <a href="docs/architecture.md">Documentation</a> Â·
   <a href="examples/rover.yaml">Example manifest</a>
 </p>
 
@@ -65,7 +65,7 @@ The CLI is shipped inside the standard Python package; there is no separate CLI 
 
 | Artifact | Format | Purpose | Verified source |
 | --- | --- | --- | --- |
-| `rivet_robot_runtime-1.2.0-py3-none-any.whl` | Universal wheel | Fast installation on supported Python 3.10–3.13 environments | [GitHub release asset](https://github.com/theworker02/rivet/releases/download/v1.2.0/rivet_robot_runtime-1.2.0-py3-none-any.whl) |
+| `rivet_robot_runtime-1.2.0-py3-none-any.whl` | Universal wheel | Fast installation on supported Python 3.10â€“3.13 environments | [GitHub release asset](https://github.com/theworker02/rivet/releases/download/v1.2.0/rivet_robot_runtime-1.2.0-py3-none-any.whl) |
 | `rivet_robot_runtime-1.2.0.tar.gz` | Source distribution | Rebuild or audit the source package locally | [GitHub release asset](https://github.com/theworker02/rivet/releases/download/v1.2.0/rivet_robot_runtime-1.2.0.tar.gz) |
 
 Both artifacts are also published through [PyPI](https://pypi.org/project/rivet-robot-runtime/1.2.0/). The published SHA-256 digests are:
@@ -146,17 +146,17 @@ Rivet is additive. Higher-level capability never bypasses the lower-level author
 
 ```text
 Applications / AI / ROS / Web
-              │
-              ▼
- VocationRuntime — roles, skills, missions, teams
-              │
-              ▼
- ContinuumRuntime — profiles, perception, resources, cluster
-              │
-              ▼
- RobotRuntime — devices, capabilities, authority, leases
-              │
-              ▼
+              â”‚
+              â–¼
+ VocationRuntime â€” roles, skills, missions, teams
+              â”‚
+              â–¼
+ ContinuumRuntime â€” profiles, perception, resources, cluster
+              â”‚
+              â–¼
+ RobotRuntime â€” devices, capabilities, authority, leases
+              â”‚
+              â–¼
  physical adapters or dependency-free simulator
 ```
 
@@ -252,7 +252,7 @@ runtime.command(
 ### Hardware abstraction and simulation
 
 - Formal `Device`, `CommandableDevice`, `Driver`, and `DriverRegistry` contracts.
-- Mock GPIO, I²C, SPI, UART, motor, camera, and sensor drivers for deterministic tests.
+- Mock GPIO, IÂ²C, SPI, UART, motor, camera, and sensor drivers for deterministic tests.
 - Capability descriptors with command schemas, telemetry, safety policy, and metadata.
 - CRC-protected Rivet Link frame encoding and decoding.
 - Fault injection that removes a simulated device, invokes its safe state, emits a fault event, and supports restoration.
@@ -269,7 +269,7 @@ runtime.command(
 ### Vocation
 
 - Role definitions with hardware requirements, competencies, policies, and prohibited actions.
-- Qualification states: `candidate → trained → validated → authorized`.
+- Qualification states: `candidate â†’ trained â†’ validated â†’ authorized`.
 - SkillGraph evidence with prerequisites, curricula, benchmark records, confidence decay, and history.
 - Synapse packages that transfer intent, assumptions, failure modes, and validation requirements.
 - Embodiment-neutral Motion IR lowered through the existing runtime command boundary.
@@ -290,9 +290,9 @@ runtime.command(
 A role evaluation reports compatibility. It does not authorize motion.
 
 ```text
-candidate ──training──▶ trained ──validation──▶ validated ──operator decision──▶ authorized
-                                                                                  │
-                                                                                  ▼
+candidate â”€â”€trainingâ”€â”€â–¶ trained â”€â”€validationâ”€â”€â–¶ validated â”€â”€operator decisionâ”€â”€â–¶ authorized
+                                                                                  â”‚
+                                                                                  â–¼
                                                         still subject to Guard, leases, and preflight
 ```
 
@@ -320,29 +320,29 @@ python examples\differential-drive\main.py
 
 ```text
 src/rivet/
-├── runtime.py             command, authority, lease, and event boundary
-├── device.py              device and capability contracts
-├── driver.py              driver protocol and registry
-├── protocol.py            CRC-protected Rivet Link frames
-├── configuration.py       JSON configuration loader
-├── storage.py             atomic local JSON storage
-├── simulator.py            dependency-free reference robot
-├── faults.py              simulation-only fault injection
-├── continuum.py           profiles, governor, and lifecycle
-├── guard.py               heartbeat safety boundary and estop
-├── perception.py          provenance, buffers, and explainable insight
-├── cluster.py             offline node registry and migration
-├── vocation.py            roles and qualification transitions
-├── skills.py              SkillGraph, curricula, evidence, and decay
-├── benchmarks.py          RivetBench result catalog
-├── synapse.py             transferable skill-package stages
-├── motion_ir.py           embodiment-neutral intent and executor
-├── passport.py             signed-style qualification export
-├── echomap.py             explainable spatial experience marks
-├── mission.py             decomposition, admission, and explanation
-├── team.py                competence-based team assignment
-├── vocation_runtime.py    Vocation composition layer
-├── cli.py                  public `rivet` command surface
+â”œâ”€â”€ runtime.py             command, authority, lease, and event boundary
+â”œâ”€â”€ device.py              device and capability contracts
+â”œâ”€â”€ driver.py              driver protocol and registry
+â”œâ”€â”€ protocol.py            CRC-protected Rivet Link frames
+â”œâ”€â”€ configuration.py       JSON configuration loader
+â”œâ”€â”€ storage.py             atomic local JSON storage
+â”œâ”€â”€ simulator.py            dependency-free reference robot
+â”œâ”€â”€ faults.py              simulation-only fault injection
+â”œâ”€â”€ continuum.py           profiles, governor, and lifecycle
+â”œâ”€â”€ guard.py               heartbeat safety boundary and estop
+â”œâ”€â”€ perception.py          provenance, buffers, and explainable insight
+â”œâ”€â”€ cluster.py             offline node registry and migration
+â”œâ”€â”€ vocation.py            roles and qualification transitions
+â”œâ”€â”€ skills.py              SkillGraph, curricula, evidence, and decay
+â”œâ”€â”€ benchmarks.py          RivetBench result catalog
+â”œâ”€â”€ synapse.py             transferable skill-package stages
+â”œâ”€â”€ motion_ir.py           embodiment-neutral intent and executor
+â”œâ”€â”€ passport.py             signed-style qualification export
+â”œâ”€â”€ echomap.py             explainable spatial experience marks
+â”œâ”€â”€ mission.py             decomposition, admission, and explanation
+â”œâ”€â”€ team.py                competence-based team assignment
+â”œâ”€â”€ vocation_runtime.py    Vocation composition layer
+â”œâ”€â”€ cli.py                  public `rivet` command surface
 
 drivers/                   reference and mock hardware adapters
 sdk/                       schemas and thin SDK examples
@@ -401,3 +401,10 @@ For contribution standards, security reporting, governance, and the project road
 ## License
 
 Rivet is released under the [MIT License](LICENSE). Hardware deployments remain responsible for their own electrical, mechanical, operational, and regulatory safety review.
+
+
+---
+
+## License & acquisition
+
+This project is **proprietary**. Production use, redistribution, and commercial deployment require a written commercial license or completed acquisition. See [LICENSE](./LICENSE) and [ACQUISITION.md](./ACQUISITION.md). Contact [@theworker02](https://github.com/theworker02).
