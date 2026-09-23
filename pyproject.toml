@@ -9,7 +9,7 @@ description = "A verification-gated, safety-first runtime and capability platfor
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{name = "Rivet contributors"}]
-license = { file = "LICENSE" }
+license = "LicenseRef-Proprietary"
 license-files = ["LICENSE"]
 keywords = ["robotics", "raspberry-pi", "robot-runtime", "hardware-abstraction", "robot-safety"]
 classifiers = [
